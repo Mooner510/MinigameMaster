@@ -21,7 +21,8 @@ public final class SeungWooMaster extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         // Plugin startup logic
-
+        master = this;
+        Bukkit.getPluginManager().registerEvents(this, this);
     }
 
     @Override
