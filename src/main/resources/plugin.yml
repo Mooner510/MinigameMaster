@@ -1,0 +1,4 @@
+name: SeungWooMaster
+version: '${version}'
+main: org.mooner.seungwoomaster.SeungWooMaster
+api-version: 1.19
