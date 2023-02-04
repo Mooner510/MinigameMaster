@@ -1,7 +1,5 @@
 package org.mooner.seungwoomaster.game.listener;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -12,14 +10,11 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
-import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class EventManager implements Listener {
     @EventHandler
@@ -57,6 +52,7 @@ public class EventManager implements Listener {
         double reducedMultiplier = attack.getValue(PlayerAttribute.DEFENSE);
         double damage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand())) * (1 + additiveMultiplier - reducedMultiplier);
         e.setDamage(damage);
+        GameManager.getInstance().
 
         if (e.getDamage() != e.getFinalDamage()) {
             if (e.getDamage() != 0 && e.getFinalDamage() != 0) {
@@ -83,17 +79,7 @@ public class EventManager implements Listener {
             if (killer != null) {
                 gameManager.addMoney(killer, 500);
             }
-            Bukkit.getOnlinePlayers().forEach(player -> {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false));
-                player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
-                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1, 1);
-                if (gameManager.isAttackPlayer(player)) {
-                    player.sendTitle(chat("&a승리!"), chat("&7능력치 토큰 &6+10"), 40, 60, 100);
-                    fireWorkSound(player);
-                } else {
-                    player.sendTitle(chat("&c패배..."), chat("&7능력치 토큰 &6+6"), 40, 60, 100);
-                }
-            });
+            gameManager.end(true);
         }
     }
 

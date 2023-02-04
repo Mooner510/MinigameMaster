@@ -15,10 +15,12 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT'
+    implementation 'com.github.InventivetalentDev:GlowAPI:1.5.7-SNAPSHOT'
 }
 
 def targetJavaVersion = 17
