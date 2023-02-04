@@ -1,12 +1,7 @@
 package org.mooner.seungwoomaster;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mooner.seungwoomaster.command.CommandManager;
 

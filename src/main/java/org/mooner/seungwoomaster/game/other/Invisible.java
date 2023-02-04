@@ -1,13 +1,8 @@
 package org.mooner.seungwoomaster.game.other;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.UUID;
-
-import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class Invisible {
     private final UUID uuid;

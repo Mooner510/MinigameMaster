@@ -1,6 +1,5 @@
 package org.mooner.seungwoomaster.game.listener;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -19,7 +18,6 @@ import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 import org.mooner.seungwoomaster.game.other.Respawn;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
-import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class EventManager implements Listener {
     @EventHandler

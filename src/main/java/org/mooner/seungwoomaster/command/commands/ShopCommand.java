@@ -1,13 +1,10 @@
 package org.mooner.seungwoomaster.command.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.mooner.seungwoomaster.command.ICommand;
 import org.mooner.seungwoomaster.game.other.HowToPlay;
 import org.mooner.seungwoomaster.game.upgrade.TokenGUI;
-
-import java.util.List;
 
 public class ShopCommand implements ICommand {
     @Override
