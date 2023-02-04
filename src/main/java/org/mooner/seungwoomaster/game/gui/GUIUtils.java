@@ -28,9 +28,9 @@ public class GUIUtils {
             im.setLore(Arrays.stream(lore)
                     .map(s -> chat("&7" + s))
                     .collect(Collectors.toList()));
-            i.setItemMeta(im);
             im.addItemFlags(ItemFlag.values());
             im.setUnbreakable(unbreakable);
+            i.setItemMeta(im);
         }
         return i;
     }

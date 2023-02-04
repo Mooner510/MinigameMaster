@@ -1,4 +1,10 @@
 name: SeungWooMaster
-version: '${version}'
+version: '1.0'
 main: org.mooner.seungwoomaster.SeungWooMaster
 api-version: 1.19
+
+commands:
+  start:
+    usage: "/start"
+  shop:
+    usage: "/shop"

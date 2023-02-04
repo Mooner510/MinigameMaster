@@ -1,5 +1,8 @@
 package org.mooner.seungwoomaster.game.listener;
 
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -13,8 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
+import org.mooner.seungwoomaster.game.other.Respawn;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
+import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class EventManager implements Listener {
     @EventHandler
@@ -52,7 +57,7 @@ public class EventManager implements Listener {
         double reducedMultiplier = attack.getValue(PlayerAttribute.DEFENSE);
         double damage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand())) * (1 + additiveMultiplier - reducedMultiplier);
         e.setDamage(damage);
-        GameManager.getInstance().
+        GameManager.getInstance().addDamage(attacker, damage);
 
         if (e.getDamage() != e.getFinalDamage()) {
             if (e.getDamage() != 0 && e.getFinalDamage() != 0) {
@@ -78,8 +83,13 @@ public class EventManager implements Listener {
             Player killer = e.getEntity().getKiller();
             if (killer != null) {
                 gameManager.addMoney(killer, 500);
+                killer.sendMessage(chat("&eYou killed &2Defender&e! You get &6500 coins&e!"));
             }
+            e.getEntity().setGameMode(GameMode.SPECTATOR);
+            e.getEntity().setHealth(e.getEntity().getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
             gameManager.end(true);
+        } else {
+            new Respawn(e.getEntity());
         }
     }
 
@@ -102,4 +112,6 @@ public class EventManager implements Listener {
             default -> 1;
         };
     }
+
+//    public void on
 }

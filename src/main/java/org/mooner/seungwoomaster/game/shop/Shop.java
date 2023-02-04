@@ -6,6 +6,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +45,7 @@ public class Shop implements Listener {
         if(!gameManager.isStarted()) return;
         if(e.getClickedInventory() == null) return;
         Player p = (Player) e.getWhoClicked();
-        if(e.getInventory().equals(p.getInventory())) {
+        if(e.getClickedInventory().equals(p.getInventory())) {
             if(e.getSlot() >= 9 && e.getSlot() <= 35) {
                 e.setCancelled(true);
             } else {

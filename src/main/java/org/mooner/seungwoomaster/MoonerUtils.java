@@ -58,7 +58,7 @@ public class MoonerUtils {
 
     public static String rome(long value) {
         StringBuilder s = new StringBuilder();
-        if(value <= 0) return value + "";
+        if(value <= 0) return "";
         if(value >= 10000) return value + "";
         long v = value;
         while(v >= 9000) {

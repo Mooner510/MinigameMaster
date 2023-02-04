@@ -1,11 +1,14 @@
 package org.mooner.seungwoomaster.command;
 
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface ICommand {
-    boolean execute(CommandSender sender, String[] args);
+    boolean execute(Player sender, String[] args);
 
-    List<String> tabComplete(CommandSender sender, String[] args);
+    default List<String> tabComplete(Player sender, String[] args) {
+        return Collections.emptyList();
+    }
 }
