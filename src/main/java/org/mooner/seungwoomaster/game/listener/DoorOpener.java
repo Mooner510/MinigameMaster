@@ -19,7 +19,7 @@ public class DoorOpener implements Listener {
             Bukkit.getScheduler().runTaskLater(master, () -> {
                 trapDoor.setOpen(true);
                 clickedBlock.setBlockData(trapDoor);
-            }, 10);
+            }, 12);
         }
     }
 }

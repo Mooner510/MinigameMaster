@@ -17,6 +17,7 @@ import org.mooner.seungwoomaster.game.other.Healing;
 import org.mooner.seungwoomaster.game.other.HowToPlay;
 import org.mooner.seungwoomaster.game.shop.ArmorTier;
 import org.mooner.seungwoomaster.game.shop.Shop;
+import org.mooner.seungwoomaster.game.shop.Values;
 import org.mooner.seungwoomaster.game.shop.WeaponTier;
 import org.mooner.seungwoomaster.game.upgrade.TokenGUI;
 
@@ -53,16 +54,18 @@ public class GameManager {
     private int round;
     private PlayMap playMap;
     private long startTime;
+    private int multipleRound;
 
     public GameManager() {
         start = false;
     }
 
-    public void start() {
-        start(null);
+    public void start(int multipleRound) {
+        start(null, multipleRound);
     }
 
-    public void start(PlayMap map) {
+    public void start(PlayMap map, int multipleRound) {
+        this.multipleRound = multipleRound;
         start = true;
         defensedPlayer = new HashSet<>();
         coin = new HashMap<>();
@@ -77,7 +80,7 @@ public class GameManager {
         for (Player player : Bukkit.getOnlinePlayers()) healingMap.put(player.getUniqueId(), new Healing(player));
         round = 0;
         PlayMap[] maps = PlayMap.values();
-        if(map == null) {
+        if (map == null) {
             playMap = maps[new Random().nextInt(maps.length)];
         } else {
             playMap = map;
@@ -160,7 +163,7 @@ public class GameManager {
             Bukkit.broadcastMessage(chat("                 &c&lATTACKERS &f&lWIN!"));
         else
             Bukkit.broadcastMessage(chat("                 &a&lDEFENDERS &f&lWIN!"));
-        Bukkit.broadcastMessage("  ");
+        Bukkit.broadcastMessage("        ");
         Bukkit.broadcastMessage(chat("  &f&lRewards:"));
 
 //        damageMap.forEach((uuid, aDouble) -> totalDamageMap.merge(uuid, aDouble, Double::sum));
@@ -244,8 +247,15 @@ public class GameManager {
                 .filter(player -> !defensedPlayer.contains(player.getUniqueId()))
                 .toList();
         if (players.isEmpty()) {
-            stop();
-            return;
+            if (multipleRound-- > 0) {
+                defensedPlayer = new HashSet<>();
+                players = Bukkit.getOnlinePlayers().stream()
+                        .filter(player -> !defensedPlayer.contains(player.getUniqueId()))
+                        .toList();
+            } else {
+                stop();
+                return;
+            }
         }
 
         swordTierMap = new HashMap<>();
@@ -262,10 +272,11 @@ public class GameManager {
             player.setGameMode(GameMode.ADVENTURE);
             player.getInventory().clear();
         });
+        List<? extends Player> finalPlayers = players;
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             changeTick++;
             if (changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 90 && changeTick % 4 == 0 || changeTick > 90 && changeTick <= 110 && changeTick % 8 == 0 || changeTick > 110 && changeTick <= 140 && changeTick % 16 == 0) {
-                Player randomPlayer = players.get(random.nextInt(players.size()));
+                Player randomPlayer = finalPlayers.get(random.nextInt(finalPlayers.size()));
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     player.sendTitle(chat("&aDefender selecting..."), randomPlayer.getName(), 0, 20, 0);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 2);
@@ -325,9 +336,10 @@ public class GameManager {
                         p.removePotionEffect(PotionEffectType.BLINDNESS);
                         updateInventory(p);
                         getModifier(p).refresh();
-                        if(isAttackPlayer(p)) p.teleport(getNearbySafeLocation(playMapLocation, 4, 12));
+                        if (isAttackPlayer(p)) p.teleport(getNearbySafeLocation(playMapLocation, 4, 12));
                         else p.teleport(playMapLocation);
                         startTime = System.currentTimeMillis();
+                        p.getInventory().addItem(WeaponTier.WOOD.getSword(), WeaponTier.WOOD.getAxe());
                         Shop.resetTimeMap();
                     });
                     bukkitTask.cancel();
@@ -348,25 +360,26 @@ public class GameManager {
         if (scoreboardManager != null) {
             Scoreboard mainScoreboard = scoreboardManager.getMainScoreboard();
             Team attackTeam = mainScoreboard.getTeam("attack");
-            if (attackTeam != null) {
-                attackTeam.setAllowFriendlyFire(false);
-                attackTeam.setCanSeeFriendlyInvisibles(true);
-                attackTeam.setPrefix(chat("&4Attacker "));
-                attackTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                attackTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
-                attackTeam.setColor(ChatColor.RED);
-                Bukkit.getOnlinePlayers().forEach(player -> attackTeam.addEntry(player.getName()));
-            }
+            if(attackTeam == null) attackTeam = mainScoreboard.registerNewTeam("attack");
+            attackTeam.setAllowFriendlyFire(false);
+            attackTeam.setCanSeeFriendlyInvisibles(true);
+            attackTeam.setPrefix(chat("&4Attacker "));
+            attackTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+            attackTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
+            attackTeam.setColor(ChatColor.RED);
+
+            Team finalAttackTeam = attackTeam;
+            Bukkit.getOnlinePlayers().forEach(player -> finalAttackTeam.addEntry(player.getName()));
+
             Team defenseTeam = mainScoreboard.getTeam("defense");
-            if (defenseTeam != null) {
-                defenseTeam.setAllowFriendlyFire(false);
-                defenseTeam.setCanSeeFriendlyInvisibles(true);
-                defenseTeam.setPrefix(chat("&2Defender "));
-                defenseTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                defenseTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
-                defenseTeam.setColor(ChatColor.GREEN);
-                defenseTeam.addEntry(Bukkit.getPlayer(defensePlayer).getName());
-            }
+            if(defenseTeam == null) defenseTeam = mainScoreboard.registerNewTeam("defense");
+            defenseTeam.setAllowFriendlyFire(false);
+            defenseTeam.setCanSeeFriendlyInvisibles(true);
+            defenseTeam.setPrefix(chat("&2Defender "));
+            defenseTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+            defenseTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
+            defenseTeam.setColor(ChatColor.GREEN);
+            defenseTeam.addEntry(Bukkit.getPlayer(defensePlayer).getName());
         }
     }
 
@@ -401,7 +414,7 @@ public class GameManager {
             if (isAttackPlayer) {
                 player.getInventory().setItem(EquipmentSlot.FEET, topArmorTier.getBoots());
             } else {
-                player.getInventory().setItem(EquipmentSlot.CHEST, topArmorTier.getLeggings());
+                player.getInventory().setItem(EquipmentSlot.CHEST, topArmorTier.getChest());
             }
         }
 
@@ -563,71 +576,140 @@ public class GameManager {
         player.getInventory().setItem(26, createItem(Material.BARRIER, 1, " "));
 //        player.getInventory().setItem(26, createItem(Material.FIRE_CHARGE, 1, "&3Fireball x1", "", "Cost: &650 Coins", "", "&e클릭해 구매하세요!"));
 
-        player.getInventory().setItem(27, createItem(Material.LEATHER_HELMET, 1,
-                "Leather Helmet & Boots",
-                "Defense: &a+5% (+2.5% each)",
-                "",
-                "Cost: &6200 Coins",
-                "",
-                clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(28, createItem(Material.LEATHER_LEGGINGS, 1,
-                "Leather Leggings",
-                "Defense: &a+5%",
-                "",
-                "Cost: &6200 Coins",
-                "",
-                clickMessage(bottomArmorTier.ordinal(),
-                        WeaponTier.NETHERITE.ordinal())));
-        player.getInventory().setItem(29, createItem(Material.IRON_HELMET, 1,
-                "Iron Helmet & Boots",
-                "Defense: &a+10%",
-                "",
-                "Cost: &6450 Coins",
-                "",
-                clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(30, createItem(Material.IRON_LEGGINGS, 1,
-                "Iron Leggings",
-                "Defense: &a+10%",
-                "",
-                "Cost: &6450 Coins",
-                "",
-                clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(31, createItem(Material.BARRIER, 1, " "));
-        player.getInventory().setItem(32, createItem(Material.DIAMOND_HELMET, 1,
-                "Diamond Helmet & Boots",
-                "Defense: &a+15%",
-                "",
-                "Cost: &6800 Coins",
-                "",
-                clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(33, createItem(Material.DIAMOND_LEGGINGS, 1,
-                "Diamond Leggings",
-                "Defense: &a+15%",
-                "",
-                "Cost: &6800 Coins",
-                "",
-                clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(34, createItem(Material.NETHERITE_HELMET, 1,
-                "Netherite Helmet & Boots",
-                "Defense: &a+20%",
-                "",
-                "Cost: &61350 Coins",
-                "",
-                clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
-        player.getInventory().setItem(35, createItem(Material.NETHERITE_LEGGINGS, 1,
-                "Netherite Leggings",
-                "Defense: &a+20%",
-                "",
-                "Cost: &61350 Coins",
-                "",
-                clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
-        ));
+
+        if (isAttackPlayer(player)) {
+            player.getInventory().setItem(27, createItem(Material.LEATHER_HELMET, 1,
+                    "Leather Helmet & Boots",
+                    "Defense: &a+5% (+2.5% each)",
+                    "",
+                    Values.LEATHER_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(28, createItem(Material.LEATHER_LEGGINGS, 1,
+                    "Leather Leggings",
+                    "Defense: &a+5%",
+                    "",
+                    Values.LEATHER_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(),
+                            WeaponTier.NETHERITE.ordinal())));
+            player.getInventory().setItem(29, createItem(Material.IRON_HELMET, 1,
+                    "Iron Helmet & Boots",
+                    "Defense: &a+10% (+5% each)",
+                    "",
+                    Values.IRON_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(30, createItem(Material.IRON_LEGGINGS, 1,
+                    "Iron Leggings",
+                    "Defense: &a+10%",
+                    "",
+                    Values.IRON_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(31, createItem(Material.BARRIER, 1, " "));
+            player.getInventory().setItem(32, createItem(Material.DIAMOND_HELMET, 1,
+                    "Diamond Helmet & Boots",
+                    "Defense: &a+15% (+7.5% each)",
+                    "",
+                    Values.DIAMOND_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(33, createItem(Material.DIAMOND_LEGGINGS, 1,
+                    "Diamond Leggings",
+                    "Defense: &a+15%",
+                    "",
+                    Values.DIAMOND_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(34, createItem(Material.NETHERITE_HELMET, 1,
+                    "Netherite Helmet & Boots",
+                    "Defense: &a+20% (+10% each)",
+                    "",
+                    Values.NETHERITE_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(35, createItem(Material.NETHERITE_LEGGINGS, 1,
+                    "Netherite Leggings",
+                    "Defense: &a+20%",
+                    "",
+                    Values.NETHERITE_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+        } else {
+            player.getInventory().setItem(27, createItem(Material.LEATHER_HELMET, 1,
+                    "Leather Helmet & Chestplate",
+                    "Defense: &a+7.5% (+2.5%, +5%)",
+                    "",
+                    Values.LEATHER_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(28, createItem(Material.LEATHER_LEGGINGS, 1,
+                    "Leather Leggings & Boots",
+                    "Defense: &a+7.5% (+5%, +2.5%)",
+                    "",
+                    Values.LEATHER_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(),
+                            WeaponTier.NETHERITE.ordinal())));
+            player.getInventory().setItem(29, createItem(Material.IRON_HELMET, 1,
+                    "Iron Helmet & Chestplate",
+                    "Defense: &a+15% (+5%, +10%)",
+                    "",
+                    Values.IRON_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(30, createItem(Material.IRON_LEGGINGS, 1,
+                    "Iron Leggings & Boots",
+                    "Defense: &a+15% (+10%, +5%)",
+                    "",
+                    Values.IRON_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(31, createItem(Material.BARRIER, 1, " "));
+            player.getInventory().setItem(32, createItem(Material.DIAMOND_HELMET, 1,
+                    "Diamond Helmet & Chestplate",
+                    "Defense: &a+22.5% (+7.5%, +15%)",
+                    "",
+                    Values.DIAMOND_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(33, createItem(Material.DIAMOND_LEGGINGS, 1,
+                    "Diamond Leggings & Boots",
+                    "Defense: &a+22.5% (+15%, +7.5%)",
+                    "",
+                    Values.DIAMOND_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(34, createItem(Material.NETHERITE_HELMET, 1,
+                    "Netherite Helmet & Chestplate",
+                    "Defense: &a+30% (+10%, +20%)",
+                    "",
+                    Values.NETHERITE_ARMOR.toString(),
+                    "",
+                    clickMessage(topArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+            player.getInventory().setItem(35, createItem(Material.NETHERITE_LEGGINGS, 1,
+                    "Netherite Leggings & Boots",
+                    "Defense: &a+7.5% (+20%, +10%)",
+                    "",
+                    Values.NETHERITE_ARMOR.toString(),
+                    "",
+                    clickMessage(bottomArmorTier.ordinal(), WeaponTier.NETHERITE.ordinal())
+            ));
+        }
     }
 
     public void addDamage(Player player, double damage) {
@@ -643,6 +725,7 @@ public class GameManager {
     }
 
     public boolean isAttackPlayer(Player player) {
+        if(defensePlayer == null) return false;
         return !defensePlayer.equals(player.getUniqueId());
     }
 
@@ -656,8 +739,9 @@ public class GameManager {
 
     public boolean removeMoney(Player player, int amount) {
         int money = coin.getOrDefault(player.getUniqueId(), 0);
-        if (money >= amount) {
-            coin.put(player.getUniqueId(), money - amount);
+        int cost = (int) (amount * (GameManager.getInstance().isAttackPlayer(player) ? 0.6 : 1));
+        if (money >= cost) {
+            coin.put(player.getUniqueId(), money - cost);
             return true;
         }
         player.sendMessage(chat("&c해당 아이템을 구매하기 위한 돈이 부족합니다."));

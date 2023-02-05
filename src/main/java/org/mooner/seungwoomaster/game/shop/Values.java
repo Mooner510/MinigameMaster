@@ -1,26 +1,26 @@
-package org.mooner.seungwoomaster.game;
+package org.mooner.seungwoomaster.game.shop;
 
 public enum Values {
     WIN_COIN(3500),
     LOSE_COIN(2500),
 
-    STONE(100),
-    IRON(400),
-    GOLD(700),
-    DIAMOND(1200),
-    NETHERITE(2000),
+    STONE(500),
+    IRON(1100),
+    GOLD(2400),
+    DIAMOND(5000),
+    NETHERITE(9000),
 
-    LEATHER_ARMOR(250),
-    IRON_ARMOR(550),
-    DIAMOND_ARMOR(1200),
-    NETHERITE_ARMOR(2500),
+    LEATHER_ARMOR(150),
+    IRON_ARMOR(400),
+    DIAMOND_ARMOR(1000),
+    NETHERITE_ARMOR(2000),
 
-    PISTON(100, true, 30),
-    GLOWER(600, true, 60),
-    FIRE_FORCE(250, true, 10),
-    DARKNESS_BLAST(350, true, 10),
-    ENDER_PEARL(100, true, 0),
-    GAPPLE(125, true, 0),
+    PISTON(800, true, 20),
+    GLOWER(1500, true, 60),
+    FIRE_FORCE(450, true, 15),
+    DARKNESS_BLAST(300, true, 15),
+    ENDER_PEARL(120, true, 0),
+    GAPPLE(350, true, 0),
     ;
 
     private final int money;

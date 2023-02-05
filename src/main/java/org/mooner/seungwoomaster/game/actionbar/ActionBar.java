@@ -42,23 +42,55 @@ public class ActionBar {
                 task.cancel();
                 return;
             }
-            Player player = GameManager.getInstance().getDefensePlayer();
-            if (player != null) {
-                if(gameManager.getStartTime() == 0 || player.hasPotionEffect(PotionEffectType.GLOWING)) return;
-                if (Math.abs(loc.getX() - player.getLocation().getX()) >= 2.6 || Math.abs(loc.getZ() - player.getLocation().getZ()) >= 2.6) {
-                    if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
-                    if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 0, false, false));
-                    if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
-                    if (!player.hasPotionEffect(PotionEffectType.SLOW))
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
+            if(gameManager.getStartTime() == 0) return;
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if(gameManager.isAttackPlayer(player)) {
+//                    Bukkit.broadcastMessage("x: " + Math.abs(loc.getX() - player.getLocation().getX()) + " / z: " + Math.abs(loc.getZ() - player.getLocation().getZ()));
+                    if (Math.abs(loc.getX() - player.getLocation().getX()) < 2.6 && Math.abs(loc.getZ() - player.getLocation().getZ()) < 2.6) {
+                        if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 5, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.POISON))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 1, false, false));
+                    } else {
+                        player.removePotionEffect(PotionEffectType.BLINDNESS);
+                        player.removePotionEffect(PotionEffectType.CONFUSION);
+                        player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                        player.removePotionEffect(PotionEffectType.SLOW);
+                        player.removePotionEffect(PotionEffectType.POISON);
+                    }
                 } else {
-                    player.removePotionEffect(PotionEffectType.BLINDNESS);
-                    player.removePotionEffect(PotionEffectType.CONFUSION);
-                    player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-                    player.removePotionEffect(PotionEffectType.SLOW);
+                    if (player.hasPotionEffect(PotionEffectType.GLOWING)) {
+                        player.removePotionEffect(PotionEffectType.BLINDNESS);
+                        player.removePotionEffect(PotionEffectType.CONFUSION);
+                        player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                        player.removePotionEffect(PotionEffectType.SLOW);
+                        player.removePotionEffect(PotionEffectType.POISON);
+                        return;
+                    }
+                    if (Math.abs(loc.getX() - player.getLocation().getX()) >= 2.6 || Math.abs(loc.getZ() - player.getLocation().getZ()) >= 2.6) {
+                        if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 0, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.POISON))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 1, false, false));
+                    } else {
+                        player.removePotionEffect(PotionEffectType.BLINDNESS);
+                        player.removePotionEffect(PotionEffectType.CONFUSION);
+                        player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                        player.removePotionEffect(PotionEffectType.SLOW);
+                        player.removePotionEffect(PotionEffectType.POISON);
+                    }
                 }
             }
         }, 0, 1);

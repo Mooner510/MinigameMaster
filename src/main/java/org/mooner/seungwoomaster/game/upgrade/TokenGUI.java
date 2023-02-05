@@ -85,6 +85,7 @@ public class TokenGUI {
         inventory.setItem(12, createItem(Material.IRON_CHESTPLATE, Math.max(modifier.getLevel(PlayerAttribute.DEFENSE), 1),
                 "&aDefense Boost " + rome(modifier.getLevel(PlayerAttribute.DEFENSE)),
                 "&7플레이어로부터 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.DEFENSE.getValue() * 100) + "%&7 감소합니다.",
+                "&7레벨당 크리티컬 피해량을 0.9레벨 억제합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DEFENSE)) + " Token"));
 
@@ -97,45 +98,45 @@ public class TokenGUI {
 
         inventory.setItem(14, createItem(Material.OAK_SAPLING, Math.max(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE), 1),
                 "&2Natural Defense Boost " + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
-                "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100) + "%&7 감소합니다.",
+                "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)) + " Token"));
 
         inventory.setItem(15, createItem(Material.EMERALD, Math.max(modifier.getLevel(PlayerAttribute.COIN_BOOST), 1),
                 "&6Coin Boost " + rome(modifier.getLevel(PlayerAttribute.COIN_BOOST)),
-                "&7코인 획득량이 레벨당 &a" + parseString(PlayerAttribute.COIN_BOOST.getValue() * 100) + "%&7 증가합니다.",
+                "&7코인 획득량이 레벨당 &a" + parseString(PlayerAttribute.COIN_BOOST.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.COIN_BOOST)) + " Token"));
 
         inventory.setItem(20, createItem(Material.IRON_SWORD, Math.max(modifier.getLevel(PlayerAttribute.MELEE_ATTACK), 1),
                 "&cMelee Attack Boost " + rome(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)),
-                "&7근접 공격력이 레벨당 &a" + parseString(PlayerAttribute.MELEE_ATTACK.getValue() * 100) + "%&7 증가합니다.",
+                "&7근접 공격력이 레벨당 &a" + parseString(PlayerAttribute.MELEE_ATTACK.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)) + " Token"));
 
-        inventory.setItem(21, createItem(Material.BOW, Math.max(modifier.getLevel(PlayerAttribute.RANGED_ATTACK), 1),
-                "&cRanged Attack Boost " + rome(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)),
-                "&7원거리 공격력이 레벨당 &a" + parseString(PlayerAttribute.RANGED_ATTACK.getValue() * 100) + "%&7 증가합니다.",
+        inventory.setItem(21, createItem(Material.IRON_BOOTS, Math.max(modifier.getLevel(PlayerAttribute.SPEED), 1),
+                "&fSpeed Boost " + rome(modifier.getLevel(PlayerAttribute.SPEED)),
+                "&7이동속도가 레벨당 &a" + parseString(PlayerAttribute.SPEED.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
-                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)) + " Token"));
+                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.SPEED)) + " Token"));
 
-        inventory.setItem(22, createItem(Material.NETHERITE_AXE, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE), 1),
+//        inventory.setItem(21, createItem(Material.BOW, Math.max(modifier.getLevel(PlayerAttribute.RANGED_ATTACK), 1),
+//                "&cRanged Attack Boost " + rome(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)),
+//                "&7원거리 공격력이 레벨당 &a" + parseString(PlayerAttribute.RANGED_ATTACK.getValue() * 100, 1) + "%&7 증가합니다.",
+//                "",
+//                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)) + " Token"));
+
+        inventory.setItem(23, createItem(Material.NETHERITE_AXE, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE), 1),
                 "&5Critical Maker " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)),
-                "&7치명타를 발생할 확률이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_CHANCE.getValue() * 100) + "%&7 증가합니다.",
+                "&7치명타를 발생할 확률이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_CHANCE.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)) + " Token"));
 
-        inventory.setItem(23, createItem(Material.BLAZE_POWDER, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE), 1),
+        inventory.setItem(24, createItem(Material.BLAZE_POWDER, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE), 1),
                 "&4Critical Master " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
-                "&7치명타시 공격력이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100) + "%&7 증가합니다.",
+                "&7치명타시 공격력이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)) + " Token"));
-
-        inventory.setItem(24, createItem(Material.IRON_BOOTS, Math.max(modifier.getLevel(PlayerAttribute.SPEED), 1),
-                "&fSpeed Boost " + rome(modifier.getLevel(PlayerAttribute.SPEED)),
-                "&7이동속도가 레벨당 &a" + parseString(PlayerAttribute.SPEED.getValue() * 100) + "%&7 증가합니다.",
-                "",
-                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.SPEED)) + " Token"));
     }
 
     public class Click implements Listener {
@@ -191,28 +192,28 @@ public class TokenGUI {
                                 modifier.addLevel(PlayerAttribute.MELEE_ATTACK);
                             } else return;
                         }
+//                        case 21 -> {
+//                            level = modifier.getLevel(PlayerAttribute.RANGED_ATTACK);
+//                            if (gameManager.removeToken(player, getReq(level))) {
+//                                modifier.addLevel(PlayerAttribute.RANGED_ATTACK);
+//                            } else return;
+//                        }
                         case 21 -> {
-                            level = modifier.getLevel(PlayerAttribute.RANGED_ATTACK);
+                            level = modifier.getLevel(PlayerAttribute.SPEED);
                             if (gameManager.removeToken(player, getReq(level))) {
-                                modifier.addLevel(PlayerAttribute.RANGED_ATTACK);
+                                modifier.addLevel(PlayerAttribute.SPEED);
                             } else return;
                         }
-                        case 22 -> {
+                        case 23 -> {
                             level = modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE);
                             if (gameManager.removeToken(player, getReq(level))) {
                                 modifier.addLevel(PlayerAttribute.CRITICAL_CHANCE);
                             } else return;
                         }
-                        case 23 -> {
+                        case 24 -> {
                             level = modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE);
                             if (gameManager.removeToken(player, getReq(level))) {
                                 modifier.addLevel(PlayerAttribute.CRITICAL_DAMAGE);
-                            } else return;
-                        }
-                        case 24 -> {
-                            level = modifier.getLevel(PlayerAttribute.SPEED);
-                            if (gameManager.removeToken(player, getReq(level))) {
-                                modifier.addLevel(PlayerAttribute.SPEED);
                             } else return;
                         }
                         default -> {

@@ -13,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
-import org.mooner.seungwoomaster.game.Values;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -133,12 +132,9 @@ public class Shop implements Listener {
                     return;
                 }
                 if (gameManager.removeMoney(p, clickArmorTier.getTopCost())) {
-                    ItemStack buy = clickArmorTier.getHelmet();
-                    p.getInventory().setItem(EquipmentSlot.HEAD, buy);
-                    p.getInventory().setItem(EquipmentSlot.FEET, clickArmorTier.getBoots());
                     gameManager.setTopArmorTier(p, clickArmorTier);
 
-                    p.sendMessage(chat("&6" + buy.getItemMeta().getDisplayName() + " & Boots&a을(를) 구매했습니다."));
+                    p.sendMessage(chat("&6" + clickArmorTier.getHelmet().getItemMeta().getDisplayName() + " & Boots&a을(를) 구매했습니다."));
                     p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     gameManager.reloadArmor(p);
                 }
@@ -153,11 +149,9 @@ public class Shop implements Listener {
                     return;
                 }
                 if (gameManager.removeMoney(p, clickArmorTier.getBottomCost())) {
-                    ItemStack buy = clickArmorTier.getLeggings();
-                    p.getInventory().setItem(EquipmentSlot.LEGS, buy);
                     gameManager.setBottomArmorTier(p, clickArmorTier);
 
-                    p.sendMessage(chat("&6" + buy.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
+                    p.sendMessage(chat("&6" + clickArmorTier.getLeggings().getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                     p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     gameManager.reloadArmor(p);
                 }
@@ -169,12 +163,13 @@ public class Shop implements Listener {
                     if (check(p, Values.PISTON) && gameManager.removeMoney(p, Values.PISTON.getMoney())) {
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (gameManager.isAttackPlayer(player)) {
-                                player.setVelocity(defensePlayer.getLocation().toVector().subtract(player.getLocation().toVector()).normalize().multiply(2.5).setY(1.5));
+                                player.setVelocity(player.getLocation().toVector().subtract(defensePlayer.getLocation().toVector()).normalize().multiply(2.5).setY(1));
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 1, 0.5f);
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_IRON_GOLEM_HURT, 0.6f, 0.5f);
                                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 1, 0.5f);
                             }
                         }
+                        Shop.setTime(Values.PISTON);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
@@ -182,7 +177,7 @@ public class Shop implements Listener {
                 case 15 -> {
                     if (check(p, Values.GLOWER) && gameManager.removeMoney(p, Values.GLOWER.getMoney())) {
                         defensePlayer.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 600, 0, true, true, true));
-
+                        Shop.setTime(Values.GLOWER);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
@@ -195,6 +190,7 @@ public class Shop implements Listener {
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1, 0.5f);
                             }
                         }
+                        Shop.setTime(Values.FIRE_FORCE);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
@@ -203,11 +199,12 @@ public class Shop implements Listener {
                     if (check(p, Values.DARKNESS_BLAST) && gameManager.removeMoney(p, Values.DARKNESS_BLAST.getMoney())) {
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (gameManager.isAttackPlayer(player)) {
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 200, 0, true, true, true));
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1, true, true, true));
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 200, 0, false, true, true));
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1, false, true, true));
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1, 0.5f);
                             }
                         }
+                        Shop.setTime(Values.DARKNESS_BLAST);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }

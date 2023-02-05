@@ -5,10 +5,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -18,7 +18,9 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.inventivetalent.glow.GlowAPI;
 import org.mooner.seungwoomaster.game.GameManager;
@@ -30,14 +32,14 @@ import static org.mooner.seungwoomaster.MoonerUtils.chat;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class EventManager implements Listener {
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player defender) {
             GameManager gameManager = GameManager.getInstance();
             if (e.getDamager() instanceof Player attacker) {
                 calc(e, attacker, defender);
                 Material material = attacker.getLocation().getBlock().getType();
-                if(attacker.getFallDistance() > 0 && attacker.getVelocity().getY() < 0 && !attacker.isInsideVehicle() && !attacker.hasPotionEffect(PotionEffectType.BLINDNESS) && material != Material.LADDER && material != Material.VINE && material != Material.TWISTING_VINES_PLANT && material != Material.WEEPING_VINES_PLANT) {
+                if (attacker.getFallDistance() > 0 && attacker.getVelocity().getY() < 0 && !attacker.isInsideVehicle() && !attacker.hasPotionEffect(PotionEffectType.BLINDNESS) && material != Material.LADDER && material != Material.VINE && material != Material.TWISTING_VINES_PLANT && material != Material.WEEPING_VINES_PLANT) {
                     e.setDamage(e.getDamage() * 1.5);
                 }
                 gameManager.addMoney(attacker, (int) Math.ceil((e.getDamage() * 30 * (gameManager.isAttackPlayer(attacker) ? 1 : 3)) / (e.getDamage() + 30)));
@@ -50,35 +52,18 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onDamaged(EntityDamageEvent e) {
-        if(e.getEntity() instanceof Player defender) {
-            if(GameManager.getInstance().getStartTime() == 0) {
+        if (e.getEntity() instanceof Player defender) {
+            if (GameManager.getInstance().getStartTime() == 0) {
                 e.setCancelled(true);
                 return;
             }
             GameManager gameManager = GameManager.getInstance();
             switch (e.getCause()) {
-                case CONTACT, SUFFOCATION, FALL, FIRE, FIRE_TICK, MELTING, LAVA, DROWNING, BLOCK_EXPLOSION, ENTITY_EXPLOSION, VOID, LIGHTNING, SUICIDE, STARVATION, POISON, MAGIC, WITHER, FALLING_BLOCK, THORNS, DRAGON_BREATH, CUSTOM, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE, SONIC_BOOM ->
+                case CONTACT, SUFFOCATION, FIRE, LAVA, FALL, MELTING, DROWNING, BLOCK_EXPLOSION, ENTITY_EXPLOSION, VOID, LIGHTNING, SUICIDE, STARVATION, POISON, MAGIC, WITHER, FALLING_BLOCK, THORNS, DRAGON_BREATH, CUSTOM, FLY_INTO_WALL, HOT_FLOOR, CRAMMING, DRYOUT, FREEZE, SONIC_BOOM ->
                         e.setDamage(Math.max(0, e.getDamage() * (1 - gameManager.getModifier(defender).getValue(PlayerAttribute.NATURAL_DEFENSE))));
             }
-            gameManager.checkHeal(defender);
-            if(defender.getHealth() - e.getFinalDamage() <= 0) {
-                e.setCancelled(true);
-                defender.setGameMode(GameMode.SPECTATOR);
-                defender.setHealth(defender.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
-                if (!gameManager.isAttackPlayer(defender)) {
-                    if(e instanceof EntityDamageByEntityEvent event) {
-                        Player killer = (Player) event.getDamager();
-                        Bukkit.getScheduler().runTaskLater(master, () -> {
-                            gameManager.addMoney(killer, 500);
-                            killer.sendMessage(chat("&eYou killed &2Defender&e! You get &6500 coins&e more!"));
-                            killer.playSound(killer, Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
-                        }, 20);
-                    }
-                    defender.setGameMode(GameMode.SPECTATOR);
-                    gameManager.end(true);
-                } else {
-                    new Respawn(defender);
-                }
+            if (defender.getHealth() - e.getFinalDamage() > 0) {
+                gameManager.checkHeal(defender);
             }
         }
     }
@@ -98,7 +83,7 @@ public class EventManager implements Listener {
         if (Math.random() < attack.getValue(PlayerAttribute.CRITICAL_CHANCE)) {
             attacker.sendTitle(" ", chat("&4{cc} CRITICAL! {cc}"), 3, 5, 15);
             defender.sendTitle(" ", chat("&c{cc} Critical by " + attacker.getName() + "! {cc}"), 3, 5, 15);
-            additiveMultiplier *= attack.getValue(PlayerAttribute.CRITICAL_DAMAGE);
+            additiveMultiplier += PlayerAttribute.CRITICAL_DAMAGE.getValue() * Math.max(0, attack.getLevel(PlayerAttribute.CRITICAL_DAMAGE) - attack.getLevel(PlayerAttribute.DEFENSE) * 0.9);
         }
 
         double reducedMultiplier = attack.getValue(PlayerAttribute.DEFENSE);
@@ -125,33 +110,58 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        GameManager gameManager = GameManager.getInstance();
+        e.getEntity().setGameMode(GameMode.SPECTATOR);
+        e.getEntity().setBedSpawnLocation(gameManager.getPlayMap().getLocation());
+        if (gameManager.isAttackPlayer(e.getEntity())) {
+            new Respawn(e.getEntity());
+        } else {
+            Player killer = e.getEntity().getKiller();
+            if (killer != null) {
+                Bukkit.getScheduler().runTaskLater(master, () -> {
+                    gameManager.addMoney(killer, 500);
+                    killer.sendMessage(chat("&eYou killed &2Defender&e! You get &6500 coins&e more!"));
+                    killer.playSound(killer, Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+                }, 20);
+            }
+            e.getEntity().setGameMode(GameMode.SPECTATOR);
+            gameManager.end(true);
+        }
     }
 
     @EventHandler
     public void onHeal(EntityRegainHealthEvent e) {
         if (e.getEntity() instanceof Player) {
-            if(e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
+            if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
                 e.setCancelled(true);
+            } else if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.MAGIC_REGEN) {
+                if (!GameManager.getInstance().isAttackPlayer(e.getEntity().getUniqueId())) {
+                    e.setAmount(e.getAmount() * 2);
+                }
             }
         }
     }
 
-    private long fierceEyesTime;
+    private long fierceEyesTime = 0;
 
-    private ImmutableSet<Material> swords = ImmutableSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD);
+    private final ImmutableSet<Material> swords = ImmutableSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD);
 
     @EventHandler
-    public void onClick(PlayerInteractEvent e) {
-        if(GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
-            if(e.getItem() != null && swords.contains(e.getItem().getType())) {
-                if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                    e.setCancelled(true);
-                    if(fierceEyesTime < System.currentTimeMillis()) {
+    public void onInterect(PlayerInteractEvent e) {
+        if (!GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
+            if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (e.getItem() == null) return;
+                if (e.getItem().getType() == Material.GOLDEN_APPLE) {
+                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
+                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1200, 1));
+                    e.getItem().setAmount(e.getItem().getAmount() - 1);
+                } else if (swords.contains(e.getItem().getType())) {
+                    if (fierceEyesTime > System.currentTimeMillis()) {
                         e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + Math.ceil(fierceEyesTime / 1000d) + "s."));
                         e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.75f, 0.5f);
                         return;
                     }
-                    fierceEyesTime = System.currentTimeMillis() + 15000;
+                    fierceEyesTime = System.currentTimeMillis() + 10000;
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         GlowAPI.setGlowing(player, GlowAPI.Color.RED, e.getPlayer());
                     }
@@ -166,25 +176,48 @@ public class EventManager implements Listener {
         }
     }
 
-    public double getToolDamage(ItemStack item) {
-        return switch (item.getType()) {
-            case WOODEN_SWORD -> 3;
-            case STONE_SWORD -> 3.5;
-            case IRON_SWORD -> 4;
-            case GOLDEN_SWORD -> 5;
-            case DIAMOND_SWORD -> 6;
-            case NETHERITE_SWORD -> 7;
+    @EventHandler
+    public void onEat(PlayerItemConsumeEvent e) {
+        if (!GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
 
-            case WOODEN_AXE -> 5;
-            case STONE_AXE -> 6.5;
-            case IRON_AXE -> 7.5;
-            case GOLDEN_AXE -> 8.5;
-            case DIAMOND_AXE -> 9;
-            case NETHERITE_AXE -> 10;
+    public double getToolDamage(ItemStack item) {
+        return getToolDamage(item.getType());
+    }
+
+    public double getToolDamage(Material item) {
+        return switch (item) {
+            case WOODEN_SWORD -> 1.5;
+            case STONE_SWORD -> 2;
+            case IRON_SWORD -> 2.5;
+            case GOLDEN_SWORD -> 3;
+            case DIAMOND_SWORD -> 4;
+            case NETHERITE_SWORD -> 5.5;
+
+            case WOODEN_AXE -> 2.5;
+            case STONE_AXE -> 3.25;
+            case IRON_AXE -> 4;
+            case GOLDEN_AXE -> 5;
+            case DIAMOND_AXE -> 6;
+            case NETHERITE_AXE -> 7;
+
+//            case WOODEN_SWORD -> 3;
+//            case STONE_SWORD -> 3.5;
+//            case IRON_SWORD -> 4;
+//            case GOLDEN_SWORD -> 5;
+//            case DIAMOND_SWORD -> 6;
+//            case NETHERITE_SWORD -> 7;
+//
+//            case WOODEN_AXE -> 5;
+//            case STONE_AXE -> 6.5;
+//            case IRON_AXE -> 7.5;
+//            case GOLDEN_AXE -> 8.5;
+//            case DIAMOND_AXE -> 9;
+//            case NETHERITE_AXE -> 10;
 
             default -> 1;
         };
     }
-
-//    public void on
 }

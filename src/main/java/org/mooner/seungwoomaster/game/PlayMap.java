@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 public enum PlayMap {
-    END("The Ender", 2, 76, 80),
+    END("The Ender", 2, 276, 80),
     NETHER("The Nether", 75, 275, 80),
     ;
 

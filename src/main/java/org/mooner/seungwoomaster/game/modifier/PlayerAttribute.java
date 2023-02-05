@@ -1,17 +1,17 @@
 package org.mooner.seungwoomaster.game.modifier;
 
 public enum PlayerAttribute {
-    HEALTH(2),
-    DEFENSE(0.02),
-    NATURAL_DEFENSE(0.1),
-    COIN_BOOST(0.12),
-    MELEE_ATTACK(0.04),
+    HEALTH(4),
+    DEFENSE(0.025),
+    NATURAL_DEFENSE(0.12),
+    COIN_BOOST(0.08),
+    MELEE_ATTACK(0.02),
     RANGED_ATTACK(0.03),
-    DODGE(0.015),
+    DODGE(0.02),
     COMBO(0.01),
-    CRITICAL_CHANCE(0.02),
-    CRITICAL_DAMAGE(0.10),
-    SPEED(0.015);
+    CRITICAL_CHANCE(0.01),
+    CRITICAL_DAMAGE(0.04),
+    SPEED(0.035);
 
     private final double value;
 
