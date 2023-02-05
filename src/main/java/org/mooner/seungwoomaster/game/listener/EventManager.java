@@ -154,6 +154,7 @@ public class EventManager implements Listener {
                 if (e.getItem().getType() == Material.GOLDEN_APPLE) {
                     e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
                     e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1200, 1));
+                    e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.ENTITY_GENERIC_EAT, 1, 1);
                     e.getItem().setAmount(e.getItem().getAmount() - 1);
                 } else if (swords.contains(e.getItem().getType())) {
                     if (fierceEyesTime > System.currentTimeMillis()) {
