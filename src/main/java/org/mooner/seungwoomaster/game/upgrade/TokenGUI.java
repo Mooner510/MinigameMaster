@@ -96,7 +96,7 @@ public class TokenGUI {
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DODGE)) + " Token"));
 
         inventory.setItem(14, createItem(Material.OAK_SAPLING, Math.max(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE), 1),
-                "&bNatural Defense Boost " + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
+                "&2Natural Defense Boost " + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
                 "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100) + "%&7 감소합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)) + " Token"));
@@ -126,7 +126,7 @@ public class TokenGUI {
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)) + " Token"));
 
         inventory.setItem(23, createItem(Material.BLAZE_POWDER, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE), 1),
-                "&dCritical Master " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
+                "&4Critical Master " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
                 "&7치명타시 공격력이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)) + " Token"));
@@ -144,7 +144,7 @@ public class TokenGUI {
             if (e.getInventory().equals(inventory)) {
                 ItemStack item = e.getCurrentItem();
                 if (item == null || e.getClickedInventory() == null || item.getType().equals(Material.AIR)) return;
-                if (e.getClickedInventory().equals(inventory)) {
+                if (e.getInventory().equals(inventory)) {
                     e.setCancelled(true);
                     if(item.getType() == Material.LIME_DYE) {
                         player.closeInventory();
@@ -158,6 +158,7 @@ public class TokenGUI {
                             level = modifier.getLevel(PlayerAttribute.HEALTH);
                             if (gameManager.removeToken(player, getReq(level))) {
                                 modifier.addLevel(PlayerAttribute.HEALTH);
+                                modifier.refresh();
                             } else return;
                         }
                         case 12 -> {
