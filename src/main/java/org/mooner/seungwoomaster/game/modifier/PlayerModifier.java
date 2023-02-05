@@ -19,15 +19,6 @@ public class PlayerModifier {
         attributeMap = new HashMap<>();
     }
 
-    public void updateHealth() {
-        Player player = Bukkit.getPlayer(uuid);
-        if(player == null) return;
-        if(GameManager.getInstance().isAttackPlayer(player))
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20 + getValue(PlayerAttribute.HEALTH));
-        else
-            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue((20 + getValue(PlayerAttribute.HEALTH)) * 3);
-    }
-
     public void addLevel(PlayerAttribute attribute) {
         attributeMap.merge(attribute, 1, Integer::sum);
     }
@@ -37,7 +28,16 @@ public class PlayerModifier {
     }
 
     public double getValue(PlayerAttribute attribute) {
-        return attributeMap.getOrDefault(attribute, 0) * attribute.getValue();
+        double additive = 0;
+        if(attribute == PlayerAttribute.DEFENSE) {
+            GameManager gameManager = GameManager.getInstance();
+            if(gameManager.isAttackPlayer(uuid)) {
+                additive += gameManager.getTopArmorTier(uuid).ordinal() * 0.05 + gameManager.getBottomArmorTier(uuid).ordinal() * 0.05;
+            } else {
+                additive += gameManager.getTopArmorTier(uuid).ordinal() * 0.075 + gameManager.getBottomArmorTier(uuid).ordinal() * 0.075;
+            }
+        }
+        return attributeMap.getOrDefault(attribute, 0) * attribute.getValue() + additive;
     }
 
     public void refresh() {
@@ -45,8 +45,13 @@ public class PlayerModifier {
         if(player == null) return;
 
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-        if(attribute != null) attribute.setBaseValue(20 + PlayerAttribute.HEALTH.getValue() * getLevel(PlayerAttribute.HEALTH));
-
+        if(attribute != null) {
+            if(GameManager.getInstance().isAttackPlayer(player)) attribute.setBaseValue(20 + getValue(PlayerAttribute.HEALTH));
+            else attribute.setBaseValue((20 + getValue(PlayerAttribute.HEALTH)) * 3);
+            player.setHealth(attribute.getBaseValue());
+        }
+        player.setArrowsInBody(0);
+        player.setFoodLevel(20);
         player.setWalkSpeed((float) (0.2 + 0.2 * getValue(PlayerAttribute.SPEED)));
     }
 }
