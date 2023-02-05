@@ -9,7 +9,7 @@ import java.util.Arrays;
 import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
 
 public enum ArmorTier {
-    NONE(0, 0, null, null, null, null),
+    NONE(0, 0, new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR), new ItemStack(Material.AIR)),
     LEATHER(200, 200,
             createItem(Material.LEATHER_HELMET, 1, "Leather Cap", "Defense: &a+2.5%"),
             createItem(Material.LEATHER_CHESTPLATE, 1, "Leather Tunic", "Defense: &a+5%"),
