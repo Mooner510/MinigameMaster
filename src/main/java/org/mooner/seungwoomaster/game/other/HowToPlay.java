@@ -32,50 +32,55 @@ public class HowToPlay {
 
             inventory.setItem(10, createItem(Material.IRON_SWORD, 1, "&cAttacker",
                     "&c공격자&7는, &a방어자&7를 &e5분&7 내에 죽여야 합니다!",
-                    "&a방어자&7를 죽인 &c공격자&7는, &6500코인&7을 추가로 획득합니다!",
-                    "",
-                    "&f기본 아이템:",
-                    "  &f• &dElytra &9(Unbreakable)",
-                    "  &f• &cInfinity Firework Rocket",
-                    "",
-                    "&f유틸리티 아이템:",
-                    "  &f• &cFire Force",
-                    "  &f• &5Ender Pearl",
-                    "  &f• &8Darkness Blast"
+                    "&a방어자&7를 죽인 &c공격자&7는, &6800코인&7을 추가로 획득합니다!"
+//                    "",
+//                    "&f기본 아이템:",
+//                    "  &f• &dElytra &9(Unbreakable)",
+//                    "  &f• &cInfinity Firework Rocket",
+//                    "",
+//                    "&f유틸리티 아이템:",
+//                    "  &f• &cFire Force",
+//                    "  &f• &5Ender Pearl",
+//                    "  &f• &8Darkness Blast"
             ));
 
             inventory.setItem(13, createItem(Material.DIAMOND, 1, "&bWin / Lose / End",
                     "라운드가 종료되면, 다음과 같은 보상을 획득합니다.",
                     "",
-                    "&f승리시:",
+                    "&a방어자 &f승리시:",
+                    "  &f• &66000 Coins",
+                    "  &f• &5Ability Token x32",
+                    "",
+                    "&c공격자 &f승리시:",
                     "  &f• &63500 Coins",
-                    "  &f• &5Ability Token x16",
+                    "  &f• &5Ability Token x24",
                     "",
                     "&f패배시:",
-                    "  &f• &62500 Coins",
-                    "  &f• &5Ability Token x10",
+                    "  &f• &62000 Coins",
+                    "  &f• &5Ability Token x16",
                     "",
                     "또한, 피해량이 높을 수록 더 많은 코인을 획득합니다.",
                     "이때 방어자는 피해량 보너스에 해당되지 않습니다.",
-                    "  &c1위&f: &61200 Coins",
-                    "  &62위&f: &6800 Coins",
-                    "  &c3위&f: &6400 Coins"
+                    "  &c1위&f: &6900 Coins",
+                    "  &62위&f: &6600 Coins",
+                    "  &e3위&f: &6300 Coins"
             ));
 
             inventory.setItem(16, createItem(Material.IRON_CHESTPLATE, 1, "&aDefender",
                     "&a방어자&7는, &c공격자&7로부터 &e5분&7동안",
                     "생존해야 합니다!",
                     "",
-                    "&a방어자&7는 검을 들고 우클릭 할 경우",
+                    "&6Sword Ability: Fierce Eyes",
+                    "&a방어자&7는 검을 들고 우클릭 할 경우 &a5초간",
                     "모든 &c공격자&7의 &d위치&7를 확인할 수 있습니다!",
-                    "&8Cooldown: &a10s",
+                    "&8Cooldown: &a15s",
                     "",
                     "&f기본 지급:",
-                    "  &f• &e3x &cHealth {hp}",
-                    "  &f• &fFull Iron Armor Set &9(Unbreakable)",
-                    "  &f• &eBow &9(Infinity, Punch II)",
+                    "  &f• &cHealth {hp} 3x",
                     "",
                     "&f유틸리티 아이템:",
+                    "  &f• &dPiston Smash",
+                    "  &f• &6Glower",
                     "  &f• &cFire Force",
                     "  &f• &8Darkness Blast",
                     "  &f• &8Invisibility Cloak"
@@ -95,13 +100,14 @@ public class HowToPlay {
                     "&f강화 가능:",
                     "  &f• &cHealth Boost",
                     "  &f• &aDefense Boost",
+                    "  &f• &9Dodge",
                     "  &f• &2Natural Defense Boost",
                     "  &f• &6Coin Boost",
-                    "  &f• &6Melee Attack Boost",
-                    "  &f• &6Ranged Attack Boost",
+                    "  &f• &cMelee Attack Boost",
+                    "  &f• &cRanged Attack Boost",
                     "  &f• &5Critical Maker",
                     "  &f• &4Critical Master",
-                    "  &f• &7Speed Boost"
+                    "  &f• &fSpeed Boost"
             ));
 
             inventory.setItem(40, createItem(Material.GRAY_DYE, 5, "&7준비",
@@ -135,7 +141,7 @@ public class HowToPlay {
         public void onClick(InventoryClickEvent e) {
             if (e.getClickedInventory() == null) return;
             Player p = (Player) e.getWhoClicked();
-            if (e.getInventory().equals(p.getInventory())) {
+            if (e.getInventory().equals(inventory)) {
                 e.setCancelled(true);
                 ItemStack item = e.getCurrentItem();
                 if(item != null) {
