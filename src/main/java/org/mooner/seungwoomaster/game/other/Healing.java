@@ -27,7 +27,7 @@ public class Healing {
                 }
                 start = false;
                 task.cancel();
-            }, 60, 60);
+            }, 80, 80);
         }
     }
 }
