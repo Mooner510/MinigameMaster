@@ -20,7 +20,8 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT'
-    implementation 'com.github.InventivetalentDev:GlowAPI:1.5.7-SNAPSHOT'
+    implementation files("C:/Users/Mooner510/Desktop/Servers/1.19.2/SeungWooMaster/plugins/GlowAPI_v1.5.7-SNAPSHOT.jar")
+    implementation files("C:/Users/Mooner510/Desktop/Servers/1.19.2/SeungWooMaster/plugins/PacketListenerAPI_v3.9.10-SNAPSHOT.jar")
 }
 
 def targetJavaVersion = 17
