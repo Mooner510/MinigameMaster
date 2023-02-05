@@ -3,21 +3,24 @@ package org.mooner.seungwoomaster.game.actionbar;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 
-import static org.mooner.seungwoomaster.MoonerUtils.chat;
-import static org.mooner.seungwoomaster.MoonerUtils.parseString;
+import static org.mooner.seungwoomaster.MoonerUtils.*;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class ActionBar {
     public static void runActionBar() {
+        GameManager gameManager = GameManager.getInstance();
+
         Bukkit.getScheduler().runTaskTimer(master, task -> {
-            GameManager gameManager = GameManager.getInstance();
-            if(!gameManager.isStarted()) {
+            if (!gameManager.isStarted()) {
                 task.cancel();
                 return;
             }
@@ -25,9 +28,48 @@ public class ActionBar {
                 PlayerModifier modifier = gameManager.getModifier(player);
                 String builder = "&c" + parseString(player.getHealth(), 1) + '/' + parseString(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue(), 1) + "{hp}" +
                         "    &aDEF " + parseString(modifier.getValue(PlayerAttribute.DEFENSE) * 100) + '%' +
+                        (gameManager.getStartTime() != 0 ? ("    &b" + calcTime(gameManager.getStartTime(), 180)) : "") +
                         "    &6" + gameManager.getMoney(player) + " Coins" +
                         "    &5" + gameManager.getToken(player) + " Tokens";
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(chat(builder)));
+                player.setFoodLevel(20);
+            }
+        }, 0, 1);
+
+        Location loc = gameManager.getPlayMap().getLocation();
+        Bukkit.getScheduler().runTaskTimer(master, task -> {
+            if (!gameManager.isStarted()) {
+                task.cancel();
+                return;
+            }
+            Player player = GameManager.getInstance().getDefensePlayer();
+            if (player != null) {
+                if(gameManager.getStartTime() == 0 || player.hasPotionEffect(PotionEffectType.GLOWING)) return;
+                if (Math.abs(loc.getX() - player.getLocation().getX()) >= 2.6 || Math.abs(loc.getZ() - player.getLocation().getZ()) >= 2.6) {
+                    if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
+                    if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 0, false, false));
+                    if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
+                    if (!player.hasPotionEffect(PotionEffectType.SLOW))
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
+                } else {
+                    player.removePotionEffect(PotionEffectType.BLINDNESS);
+                    player.removePotionEffect(PotionEffectType.CONFUSION);
+                    player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                    player.removePotionEffect(PotionEffectType.SLOW);
+                }
+            }
+        }, 0, 1);
+
+        Bukkit.getScheduler().runTaskTimer(master, task -> {
+            if (!gameManager.isStarted()) {
+                task.cancel();
+                return;
+            }
+            if(gameManager.getStartTime() != 0 && gameManager.getStartTime() + 180000 <= System.currentTimeMillis()) {
+                gameManager.end(false);
             }
         }, 0, 1);
     }
