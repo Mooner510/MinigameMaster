@@ -13,6 +13,8 @@ import org.mooner.seungwoomaster.game.actionbar.ActionBar;
 import org.mooner.seungwoomaster.game.listener.EventManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
+import org.mooner.seungwoomaster.game.other.Healing;
+import org.mooner.seungwoomaster.game.other.HowToPlay;
 import org.mooner.seungwoomaster.game.shop.ArmorTier;
 import org.mooner.seungwoomaster.game.shop.Shop;
 import org.mooner.seungwoomaster.game.shop.WeaponTier;
@@ -44,11 +46,12 @@ public class GameManager {
     private Map<UUID, WeaponTier> axeTierMap;
     private Map<UUID, ArmorTier> topArmorTierMap;
     private Map<UUID, ArmorTier> bottomArmorTierMap;
+    private Map<UUID, Healing> healingMap;
+    private Set<UUID> readySet;
     //    private Map<UUID,>
     private Shop shop;
     private EventManager eventManager;
     private int round;
-    private ActionBar actionBar;
 
     public GameManager() {
         start = false;
@@ -68,7 +71,9 @@ public class GameManager {
         axeTierMap = new HashMap<>();
         topArmorTierMap = new HashMap<>();
         bottomArmorTierMap = new HashMap<>();
-        actionBar = new ActionBar();
+        healingMap = new HashMap<>();
+        for (Player player : onlinePlayers) healingMap.put(player.getUniqueId(), new Healing(player));
+        ActionBar.runActionBar();
         round = 0;
 
         onlinePlayers.forEach(this::updateInventory);
@@ -90,7 +95,6 @@ public class GameManager {
         axeTierMap = null;
         topArmorTierMap = null;
         bottomArmorTierMap = null;
-        actionBar = null;
 
         Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().clear());
         HandlerList.unregisterAll(shop);
@@ -110,11 +114,11 @@ public class GameManager {
     }
 
     public void end(boolean attackerWin) {
-        Bukkit.broadcastMessage(chat("&a■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
+        Bukkit.broadcastMessage(chat("&a■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
         if (attackerWin)
-            Bukkit.broadcastMessage(chat("                    &c&lATTACKERS &f&lWIN!"));
+            Bukkit.broadcastMessage(chat("                 &c&lATTACKERS &f&lWIN!"));
         else
-            Bukkit.broadcastMessage(chat("                    &a&lDEFENDERS &f&lWIN!"));
+            Bukkit.broadcastMessage(chat("                 &a&lDEFENDERS &f&lWIN!"));
         Bukkit.broadcastMessage("");
         Bukkit.broadcastMessage(chat("  &f&lRewards:"));
 
@@ -143,7 +147,7 @@ public class GameManager {
                 }
             }
         }
-        Bukkit.broadcastMessage(chat("&a■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
+        Bukkit.broadcastMessage(chat("&a■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
         Bukkit.getOnlinePlayers().forEach(player -> {
             player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false));
             player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
@@ -198,6 +202,7 @@ public class GameManager {
     public void changeDefender() {
         if (defensedPlayer != null) defensedPlayer.add(defensePlayer);
         round++;
+        resetTeam();
         List<? extends Player> players = Bukkit.getOnlinePlayers().stream()
                 .filter(player -> !defensedPlayer.contains(player.getUniqueId()))
                 .toList();
@@ -215,65 +220,119 @@ public class GameManager {
         });
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             changeTick++;
-            if (changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 80 && changeTick % 4 == 0 || changeTick > 80 && changeTick <= 100 && changeTick % 8 == 0) {
+            if (changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 90 && changeTick % 4 == 0 || changeTick > 90 && changeTick <= 110 && changeTick % 8 == 0 || changeTick > 110 && changeTick <= 140 && changeTick % 16 == 0) {
                 Player randomPlayer = players.get(random.nextInt(players.size()));
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     player.sendTitle(chat("&aDefender selecting..."), randomPlayer.getName(), 0, 20, 0);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 2);
                 });
             }
-            ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
-            if (scoreboardManager != null) {
-                Scoreboard mainScoreboard = scoreboardManager.getMainScoreboard();
-                Team attackTeam = mainScoreboard.getTeam("attack");
-                if (attackTeam != null) {
-                    attackTeam.setAllowFriendlyFire(false);
-                    attackTeam.setCanSeeFriendlyInvisibles(true);
-                    attackTeam.setPrefix(chat("&4Attacker "));
-                    attackTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                    attackTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OWN_TEAM);
-                    attackTeam.setColor(ChatColor.RED);
-                    Bukkit.getOnlinePlayers().forEach(player -> attackTeam.addEntry(player.getName()));
-                }
-                Team defenseTeam = mainScoreboard.getTeam("defense");
-                if (defenseTeam != null) {
-                    defenseTeam.setAllowFriendlyFire(false);
-                    defenseTeam.setCanSeeFriendlyInvisibles(true);
-                    defenseTeam.setPrefix(chat("&2Defender "));
-                    defenseTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                    defenseTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OWN_TEAM);
-                    defenseTeam.setColor(ChatColor.GREEN);
-                    defenseTeam.addEntry(Bukkit.getPlayer(defensePlayer).getName());
-                }
-            }
-            if (changeTick > 100) {
+            if (changeTick > 140) {
                 Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendTitle(chat("&4{as} Round " + round + " Defender {as}"), ChatColor.GREEN + Bukkit.getPlayer(defensePlayer).getName(), 10, 10, 80);
+                    player.sendTitle(chat("&2{def} Round " + round + " Defender {def}"), ChatColor.GREEN + Bukkit.getPlayer(defensePlayer).getName(), 10, 10, 80);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 2);
                     player.playSound(player, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
                 });
-                changeTick = 3;
-                Bukkit.getScheduler().runTaskTimer(master, bukkitTask -> {
-                    if (changeTick == 0) {
-                        Bukkit.getOnlinePlayers().forEach(player -> {
-                            player.sendTitle("", chat("&cRound Start!"), 20, 40, 60);
-                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
-                            player.playSound(player, Sound.ENTITY_WOLF_HOWL, 1, 1f);
-                            player.playSound(player, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
-                            player.removePotionEffect(PotionEffectType.BLINDNESS);
-                        });
-                        bukkitTask.cancel();
-                    } else {
-                        Bukkit.getOnlinePlayers().forEach(player -> {
-                            player.sendTitle(chat("&eRound " + round), String.valueOf(changeTick), 0, 22, 0);
-                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 0.5f);
-                        });
-                    }
-                    changeTick--;
-                }, 100, 20);
+                Bukkit.getScheduler().runTaskLater(master, () -> {
+                    requestReady();
+                    Bukkit.getOnlinePlayers().forEach(player -> {
+                        player.playSound(player, Sound.UI_TOAST_IN, 1, 1);
+                        player.playSound(player, Sound.UI_TOAST_IN, 1, 1);
+                        new HowToPlay(player);
+                    });
+                }, 100);
+                updateTeam();
                 task.cancel();
             }
         }, 40, 1);
+    }
+
+    private void requestReady() {
+        readySet = new HashSet<>();
+        Bukkit.broadcastMessage(chat("&a모든 플레이어가 준비하면, 게임이 시작됩니다!"));
+    }
+
+    public void setReady(Player player) {
+        if(readySet.contains(player.getUniqueId())) return;
+        readySet.add(player.getUniqueId());
+        Bukkit.broadcastMessage(chat("&6" + player.getName() + "&a Ready!"));
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        onlinePlayers.forEach(p -> {
+            p.playSound(p, Sound.UI_BUTTON_CLICK, 1, 0.75f);
+            p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2f);
+        });
+        if(readySet.size() == onlinePlayers.size()) {
+            changeTick = 5;
+            onlinePlayers.forEach(p -> {
+                p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
+                p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
+                p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
+                p.playSound(p, Sound.ENTITY_PLAYER_LEVELUP, 1, 0.75f);
+            });
+            Bukkit.broadcastMessage(chat("&e모든 플레이어가 준비를 마쳤습니다!"));
+            Bukkit.getScheduler().runTaskTimer(master, bukkitTask -> {
+                if (changeTick == 0) {
+                    Bukkit.getOnlinePlayers().forEach(p -> {
+                        p.sendTitle("", chat("&cRound Start!"), 20, 40, 60);
+                        p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
+                        p.playSound(p, Sound.ENTITY_PLAYER_LEVELUP, 1, 0.5f);
+                        p.playSound(p, Sound.ENTITY_WOLF_HOWL, 1, 1f);
+                        p.playSound(p, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
+                        p.removePotionEffect(PotionEffectType.BLINDNESS);
+                    });
+                    bukkitTask.cancel();
+                } else {
+                    Bukkit.getOnlinePlayers().forEach(p -> {
+                        p.sendTitle(chat("&eRound " + round), String.valueOf(changeTick), 0, 22, 0);
+                        p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 0.5f);
+                    });
+                    Bukkit.broadcastMessage(chat("&e게임이 &c" + changeTick + "&e초 후에 시작합니다!"));
+                }
+                changeTick--;
+            }, 20, 20);
+        }
+    }
+
+    private void updateTeam() {
+        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+        if (scoreboardManager != null) {
+            Scoreboard mainScoreboard = scoreboardManager.getMainScoreboard();
+            Team attackTeam = mainScoreboard.getTeam("attack");
+            if (attackTeam != null) {
+                attackTeam.setAllowFriendlyFire(false);
+                attackTeam.setCanSeeFriendlyInvisibles(true);
+                attackTeam.setPrefix(chat("&4Attacker "));
+                attackTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                attackTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
+                attackTeam.setColor(ChatColor.RED);
+                Bukkit.getOnlinePlayers().forEach(player -> attackTeam.addEntry(player.getName()));
+            }
+            Team defenseTeam = mainScoreboard.getTeam("defense");
+            if (defenseTeam != null) {
+                defenseTeam.setAllowFriendlyFire(false);
+                defenseTeam.setCanSeeFriendlyInvisibles(true);
+                defenseTeam.setPrefix(chat("&2Defender "));
+                defenseTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                defenseTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
+                defenseTeam.setColor(ChatColor.GREEN);
+                defenseTeam.addEntry(Bukkit.getPlayer(defensePlayer).getName());
+            }
+        }
+    }
+
+    private void resetTeam() {
+        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+        if (scoreboardManager != null) {
+            Scoreboard mainScoreboard = scoreboardManager.getMainScoreboard();
+            Team attackTeam = mainScoreboard.getTeam("attack");
+            if (attackTeam != null) {
+                attackTeam.getEntries().forEach(attackTeam::removeEntry);
+            }
+            Team defenseTeam = mainScoreboard.getTeam("defense");
+            if (defenseTeam != null) {
+                defenseTeam.getEntries().forEach(defenseTeam::removeEntry);
+            }
+        }
     }
 
     public String clickMessage(int now, int req) {

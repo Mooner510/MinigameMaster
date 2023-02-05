@@ -2,7 +2,6 @@ package org.mooner.seungwoomaster.game.other;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
@@ -13,7 +12,8 @@ public class Respawn {
 
     public Respawn(Player player) {
         player.setGameMode(GameMode.SPECTATOR);
-        player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+        player.spigot().respawn();
+//        player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
         time = 6;
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             if(time-- <= 0) {

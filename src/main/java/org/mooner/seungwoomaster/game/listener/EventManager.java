@@ -1,6 +1,8 @@
 package org.mooner.seungwoomaster.game.listener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -9,9 +11,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
@@ -26,6 +30,10 @@ public class EventManager implements Listener {
             GameManager gameManager = GameManager.getInstance();
             if (e.getDamager() instanceof Player attacker) {
                 calc(e, attacker, defender);
+                Material material = attacker.getLocation().getBlock().getType();
+                if(attacker.getFallDistance() > 0 && attacker.getVelocity().getY() < 0 && !attacker.isInsideVehicle() && !attacker.hasPotionEffect(PotionEffectType.BLINDNESS) && material != Material.LADDER && material != Material.VINE && material != Material.TWISTING_VINES_PLANT && material != Material.WEEPING_VINES_PLANT) {
+                    e.setDamage(e.getDamage() * 1.5);
+                }
                 gameManager.addMoney(attacker, (int) ((e.getDamage() * 30 * (gameManager.isAttackPlayer(attacker) ? 1 : 3)) / (e.getDamage() + 30)));
             } else if (e.getDamager() instanceof Projectile projectile && projectile.getShooter() instanceof Player attacker) {
                 calc(e, attacker, defender);
@@ -88,6 +96,15 @@ public class EventManager implements Listener {
             gameManager.end(true);
         } else {
             new Respawn(e.getEntity());
+        }
+    }
+
+    @EventHandler
+    public void onHeal(EntityRegainHealthEvent e) {
+        if (e.getEntity() instanceof Player player) {
+            if(e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
+                e.setCancelled(true);
+            }
         }
     }
 

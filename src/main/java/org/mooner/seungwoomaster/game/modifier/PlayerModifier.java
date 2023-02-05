@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.mooner.seungwoomaster.game.GameManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,15 @@ public class PlayerModifier {
     public PlayerModifier(UUID uuid) {
         this.uuid = uuid;
         attributeMap = new HashMap<>();
+    }
+
+    public void updateHealth() {
+        Player player = Bukkit.getPlayer(uuid);
+        if(player == null) return;
+        if(GameManager.getInstance().isAttackPlayer(player))
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20 + getValue(PlayerAttribute.HEALTH));
+        else
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue((20 + getValue(PlayerAttribute.HEALTH)) * 3);
     }
 
     public void addLevel(PlayerAttribute attribute) {

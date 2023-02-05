@@ -14,7 +14,7 @@ import static org.mooner.seungwoomaster.MoonerUtils.parseString;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class ActionBar {
-    public ActionBar() {
+    public static void runActionBar() {
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             GameManager gameManager = GameManager.getInstance();
             if(!gameManager.isStarted()) {

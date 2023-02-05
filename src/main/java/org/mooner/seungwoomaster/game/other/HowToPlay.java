@@ -11,8 +11,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.mooner.seungwoomaster.game.GameManager;
 
-import static org.mooner.seungwoomaster.MoonerUtils.chat;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
 
@@ -32,6 +32,7 @@ public class HowToPlay {
 
             inventory.setItem(10, createItem(Material.IRON_SWORD, 1, "&cAttacker",
                     "&c공격자&7는, &a방어자&7를 &e5분&7 내에 죽여야 합니다!",
+                    "&a방어자&7를 죽인 &c공격자&7는, &6500코인&7을 추가로 획득합니다!",
                     "",
                     "&f기본 아이템:",
                     "  &f• &dElytra &9(Unbreakable)",
@@ -43,9 +44,22 @@ public class HowToPlay {
                     "  &f• &8Darkness Blast"
             ));
 
-            inventory.setItem(13, createItem(Material.DIAMOND, 1, "&bWin / Lose",
-                    "승리시, &6400G&7와 &5Ability Token x16&7을 획득합니다.",
-                    "패배시, &6200G&7와 &5Ability Token x10&7을 획득합니다."
+            inventory.setItem(13, createItem(Material.DIAMOND, 1, "&bWin / Lose / End",
+                    "라운드가 종료되면, 다음과 같은 보상을 획득합니다.",
+                    "",
+                    "&f승리시:",
+                    "  &f• &63500 Coins",
+                    "  &f• &5Ability Token x16",
+                    "",
+                    "&f패배시:",
+                    "  &f• &62500 Coins",
+                    "  &f• &5Ability Token x10",
+                    "",
+                    "또한, 피해량이 높을 수록 더 많은 코인을 획득합니다.",
+                    "이때 방어자는 피해량 보너스에 해당되지 않습니다.",
+                    "  &c1위&f: &61200 Coins",
+                    "  &62위&f: &6800 Coins",
+                    "  &c3위&f: &6400 Coins"
             ));
 
             inventory.setItem(16, createItem(Material.IRON_CHESTPLATE, 1, "&aDefender",
@@ -136,10 +150,10 @@ public class HowToPlay {
         public void onClose(InventoryCloseEvent e) {
             if(inventory.equals(e.getInventory())) {
                 if(e.getInventory().getItem(40).getType() == Material.LIME_DYE) {
+                    GameManager.getInstance().setReady(player);
                     player = null;
                     inventory = null;
                     HandlerList.unregisterAll(this);
-                    Bukkit.broadcastMessage(chat("&6" + player.getName() + "&a Ready!"));
                     Bukkit.getOnlinePlayers().forEach(p -> p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2));
                 } else {
                     Bukkit.getScheduler().runTaskLater(master, () -> e.getPlayer().openInventory(inventory), 1);

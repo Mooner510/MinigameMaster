@@ -15,6 +15,8 @@ import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 
+import java.util.Arrays;
+
 import static org.mooner.seungwoomaster.MoonerUtils.*;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
@@ -26,7 +28,7 @@ public class TokenGUI {
     private final ItemStack glass = createItem(Material.BLACK_STAINED_GLASS_PANE, 1, " ");
 
     public int getReq(int level) {
-        return level;
+        return level + 1;
 //        return (level + 1) * (level + 2) / 2;
     }
 
@@ -75,62 +77,62 @@ public class TokenGUI {
         }
 
         inventory.setItem(11, createItem(Material.GOLDEN_APPLE, Math.max(modifier.getLevel(PlayerAttribute.HEALTH), 1),
-                "&cHealth Boost" + rome(modifier.getLevel(PlayerAttribute.HEALTH)),
+                "&cHealth Boost " + rome(modifier.getLevel(PlayerAttribute.HEALTH)),
                 "&7체력이 레벨당 &c" + parseString(PlayerAttribute.HEALTH.getValue()) + "&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.HEALTH)) + " Token"));
 
         inventory.setItem(12, createItem(Material.IRON_CHESTPLATE, Math.max(modifier.getLevel(PlayerAttribute.DEFENSE), 1),
-                "&cDefense Boost" + rome(modifier.getLevel(PlayerAttribute.DEFENSE)),
+                "&aDefense Boost " + rome(modifier.getLevel(PlayerAttribute.DEFENSE)),
                 "&7플레이어로부터 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.DEFENSE.getValue() * 100) + "%&7 감소합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DEFENSE)) + " Token"));
 
         inventory.setItem(13, createItem(Material.SHIELD, Math.max(modifier.getLevel(PlayerAttribute.DODGE), 1),
-                "&cDodge" + rome(modifier.getLevel(PlayerAttribute.DODGE)),
+                "&9Dodge " + rome(modifier.getLevel(PlayerAttribute.DODGE)),
                 "&7레벨당 &a" + parseString(PlayerAttribute.DODGE.getValue() * 100,
                         2) + "%&7 확률로 공격을 회피합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DODGE)) + " Token"));
 
         inventory.setItem(14, createItem(Material.OAK_SAPLING, Math.max(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE), 1),
-                "&cNatural Defense Boost" + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
+                "&bNatural Defense Boost " + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
                 "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100) + "%&7 감소합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)) + " Token"));
 
         inventory.setItem(15, createItem(Material.EMERALD, Math.max(modifier.getLevel(PlayerAttribute.COIN_BOOST), 1),
-                "&6Coin Boost" + rome(modifier.getLevel(PlayerAttribute.COIN_BOOST)),
+                "&6Coin Boost " + rome(modifier.getLevel(PlayerAttribute.COIN_BOOST)),
                 "&7코인 획득량이 레벨당 &a" + parseString(PlayerAttribute.COIN_BOOST.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.COIN_BOOST)) + " Token"));
 
         inventory.setItem(20, createItem(Material.IRON_SWORD, Math.max(modifier.getLevel(PlayerAttribute.MELEE_ATTACK), 1),
-                "&6Melee Attack Boost" + rome(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)),
+                "&cMelee Attack Boost " + rome(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)),
                 "&7근접 공격력이 레벨당 &a" + parseString(PlayerAttribute.MELEE_ATTACK.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)) + " Token"));
 
         inventory.setItem(21, createItem(Material.BOW, Math.max(modifier.getLevel(PlayerAttribute.RANGED_ATTACK), 1),
-                "&6Ranged Attack Boost" + rome(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)),
+                "&cRanged Attack Boost " + rome(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)),
                 "&7원거리 공격력이 레벨당 &a" + parseString(PlayerAttribute.RANGED_ATTACK.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)) + " Token"));
 
         inventory.setItem(22, createItem(Material.NETHERITE_AXE, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE), 1),
-                "&6Critical Maker" + rome(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)),
+                "&5Critical Maker " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)),
                 "&7치명타를 발생할 확률이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_CHANCE.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)) + " Token"));
 
         inventory.setItem(23, createItem(Material.BLAZE_POWDER, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE), 1),
-                "&6Critical Master" + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
+                "&dCritical Master " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
                 "&7치명타시 공격력이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)) + " Token"));
 
         inventory.setItem(24, createItem(Material.IRON_BOOTS, Math.max(modifier.getLevel(PlayerAttribute.SPEED), 1),
-                "&6Speed Boost" + rome(modifier.getLevel(PlayerAttribute.SPEED)),
+                "&fSpeed Boost " + rome(modifier.getLevel(PlayerAttribute.SPEED)),
                 "&7이동속도가 레벨당 &a" + parseString(PlayerAttribute.SPEED.getValue() * 100) + "%&7 증가합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.SPEED)) + " Token"));
@@ -216,7 +218,12 @@ public class TokenGUI {
                             return;
                         }
                     }
-                    player.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) &b" + (level + 1) + " 레벨&a로 강화했습니다."));
+                    String displayName = item.getItemMeta().getDisplayName();
+                    if(level > 0) {
+                        String[] s = displayName.split(" ");
+                        displayName = String.join(" ", Arrays.copyOf(s, s.length - 1));
+                    }
+                    player.sendMessage(chat(displayName + "&a을(를) &b" + (level + 1) + "레벨&a로 강화했습니다."));
                     player.playSound(player, Sound.BLOCK_ANVIL_USE, 0.8f, 2f);
                     update(modifier);
                 }
@@ -230,9 +237,8 @@ public class TokenGUI {
                     Bukkit.getScheduler().runTaskLater(master, () -> e.getPlayer().openInventory(inventory), 1);
                     return;
                 }
+                GameManager.getInstance().setReady(player);
                 HandlerList.unregisterAll(this);
-                Bukkit.broadcastMessage(chat("&6" + player.getName() + "&a Ready!"));
-                Bukkit.getOnlinePlayers().forEach(p -> p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2));
                 player = null;
                 inventory = null;
             }
