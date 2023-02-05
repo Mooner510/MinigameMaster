@@ -112,7 +112,7 @@ public class EventManager implements Listener {
     public void onDeath(PlayerDeathEvent e) {
         GameManager gameManager = GameManager.getInstance();
         e.getEntity().setGameMode(GameMode.SPECTATOR);
-        e.getEntity().setBedSpawnLocation(gameManager.getPlayMap().getLocation());
+        e.getEntity().setBedSpawnLocation(gameManager.getPlayMap().getLocation(), true);
         if (gameManager.isAttackPlayer(e.getEntity())) {
             new Respawn(e.getEntity());
         } else {
@@ -157,7 +157,7 @@ public class EventManager implements Listener {
                     e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.ENTITY_GENERIC_EAT, 1, 1);
                     e.getItem().setAmount(e.getItem().getAmount() - 1);
                 } else if (swords.contains(e.getItem().getType())) {
-                    if (fierceEyesTime > System.currentTimeMillis()) {
+                    if (fierceEyesTime < System.currentTimeMillis()) {
                         e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + Math.ceil(fierceEyesTime / 1000d) + "s."));
                         e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.75f, 0.5f);
                         return;

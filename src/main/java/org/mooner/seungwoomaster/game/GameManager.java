@@ -513,40 +513,37 @@ public class GameManager {
             player.getInventory().setItem(17, createItem(Material.BARRIER, 1, " "));
         } else {
             player.getInventory().setItem(14, createItem(Material.PISTON, 1,
-                    "&dPiston Smash (Instant)",
-                    "Throw &aall &7enemies &7in your",
-                    "&7opposite direction.",
-                    "&8Cooldown: 30s",
+                    "&d압축 펌프 충격기 (Piston Smash)",
+                    "&a모든 &7적을 자신의 반대 방향으로 던집니다.",
+                    "&8Cooldown: &a"+Values.PISTON.getCooltime()+"s",
                     "",
                     Values.PISTON.toString(),
                     "",
                     "&e클릭해 사용하세요!"
             ));
             player.getInventory().setItem(15, createItem(Material.GLOW_INK_SAC, 1,
-                    "&6Glower (Instant)",
-                    "&6Glowing &7for &a30s&7.",
-                    "You can go outside of base while &6Glowing&7.",
-                    "&8Cooldown: 60s",
+                    "&6발광제 (Glower)",
+                    "&a30초&7간 &6발광 &7합니다.",
+                    "&6발광&7효과가 지속되는 동안 기지 밖으로 나갈 수 있습니다.",
+                    "&8Cooldown: &a"+Values.GLOWER.getCooltime()+"s",
                     "",
                     Values.GLOWER.toString(),
                     "",
                     "&e클릭해 사용하세요!"
             ));
             player.getInventory().setItem(16, createItem(Material.BLAZE_ROD, 1,
-                    "&cFire Force (Instant)",
-                    "Set &aall &7enemies &7on &cfire&7 for",
-                    "&a10 seconds&7!",
-                    "&8Cooldown: 10s",
+                    "&c화염의 폭풍 (Fire Force)",
+                    "&a모든 &7적에게 &a10초&7간 화염을 선사합니다!",
+                    "&8Cooldown: "+Values.FIRE_FORCE.getCooltime()+"s",
                     "",
                     Values.FIRE_FORCE.toString(),
                     "",
                     "&e클릭해 구매하세요!"
             ));
             player.getInventory().setItem(17, createItem(Material.WITHER_SKELETON_SKULL, 1,
-                    "&8Darkness Blast (Instant)",
-                    "Give &aall &7enemies &8Darkness&7,",
-                    "&8Slowness II &7effect &7for &a10 seconds&7!",
-                    "&8Cooldown: 10s",
+                    "&8어둠의 폭발 (Darkness Blast)",
+                    "&a모든 &7적에게 &8어둠&7, &8구속 II&7효과를 적용시킵니다.",
+                    "&8Cooldown: "+Values.DARKNESS_BLAST.getCooltime()+"s",
                     "",
                     Values.DARKNESS_BLAST.toString(),
                     "",
@@ -559,14 +556,14 @@ public class GameManager {
 //        player.getInventory().setItem(17, createItem(Material.FEATHER, 8, "Arrow x8", "", "Cost: &6100 Coins", "", "&e클릭해 구매하세요!"));
 
         player.getInventory().setItem(23, createItem(Material.ENDER_PEARL, 1,
-                "&5Ender Pearl",
+                "&5엔더 진주",
                 "",
                 Values.ENDER_PEARL.toString(),
                 "",
                 "&e클릭해 구매하세요!"
         ));
         player.getInventory().setItem(24, createItem(Material.GOLDEN_APPLE, 1,
-                "&6GApple",
+                "&6황금 사과",
                 "",
                 Values.GAPPLE.toString(),
                 "",
