@@ -19,13 +19,15 @@ public class Healing {
         if(player.getHealth() < player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()) {
             start = true;
             Bukkit.getScheduler().runTaskTimer(master, task -> {
-                if(player.getHealth() < player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()) {
-                    player.setHealth(player.getHealth() + 1);
+                if(player.isDead()) return;
+                double maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+                if(player.getHealth() < maxHealth) {
+                    player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
                     return;
                 }
                 start = false;
                 task.cancel();
-            }, 80, 80);
+            }, 60, 60);
         }
     }
 }
