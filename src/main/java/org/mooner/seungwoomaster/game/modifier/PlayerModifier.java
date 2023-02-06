@@ -47,7 +47,7 @@ public class PlayerModifier {
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if(attribute != null) {
             if(GameManager.getInstance().isAttackPlayer(player)) attribute.setBaseValue(20 + getValue(PlayerAttribute.HEALTH));
-            else attribute.setBaseValue((20 + getValue(PlayerAttribute.HEALTH)) * 3);
+            else attribute.setBaseValue((20 + (getValue(PlayerAttribute.HEALTH))) * Bukkit.getOnlinePlayers().size());
             player.setHealth(attribute.getBaseValue());
         }
         player.setArrowsInBody(0);

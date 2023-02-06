@@ -27,7 +27,7 @@ public class ActionBar {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 PlayerModifier modifier = gameManager.getModifier(player);
                 String builder = "&c" + parseString(player.getHealth(), 1) + '/' + parseString(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue(), 1) + "{hp}" +
-                        "    &aDEF " + parseString(modifier.getValue(PlayerAttribute.DEFENSE) * 100) + '%' +
+                        "    &aDEF " + parseString(Math.min(modifier.getValue(PlayerAttribute.DEFENSE) * 100, 99.9)) + '%' +
                         (gameManager.getStartTime() != 0 ? ("    &b" + calcTime(gameManager.getStartTime(), 180)) : "") +
                         "    &6" + gameManager.getMoney(player) + " Coins" +
                         "    &5" + gameManager.getToken(player) + " Tokens";
@@ -42,21 +42,28 @@ public class ActionBar {
                 task.cancel();
                 return;
             }
-            if(gameManager.getStartTime() == 0) return;
             for (Player player : Bukkit.getOnlinePlayers()) {
+                if(gameManager.getStartTime() == 0) {
+                    player.removePotionEffect(PotionEffectType.CONFUSION);
+                    player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                    player.removePotionEffect(PotionEffectType.SLOW);
+                    player.removePotionEffect(PotionEffectType.POISON);
+                    return;
+                }
+                Location location = player.getLocation();
                 if(gameManager.isAttackPlayer(player)) {
 //                    Bukkit.broadcastMessage("x: " + Math.abs(loc.getX() - player.getLocation().getX()) + " / z: " + Math.abs(loc.getZ() - player.getLocation().getZ()));
-                    if (Math.abs(loc.getX() - player.getLocation().getX()) < 2.6 && Math.abs(loc.getZ() - player.getLocation().getZ()) < 2.6) {
+                    if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
                         if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
                             player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
                         if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 5, false, false));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 5, false, false, false));
                         if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 10, false, false, false));
                         if (!player.hasPotionEffect(PotionEffectType.SLOW))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 3, false, false, false));
                         if (!player.hasPotionEffect(PotionEffectType.POISON))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 1, false, false));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 3, false, false, false));
                     } else {
                         player.removePotionEffect(PotionEffectType.BLINDNESS);
                         player.removePotionEffect(PotionEffectType.CONFUSION);
@@ -73,23 +80,23 @@ public class ActionBar {
                         player.removePotionEffect(PotionEffectType.POISON);
                         return;
                     }
-                    if (Math.abs(loc.getX() - player.getLocation().getX()) >= 2.6 || Math.abs(loc.getZ() - player.getLocation().getZ()) >= 2.6) {
-                        if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
-                        if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 0, false, false));
-                        if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false));
-                        if (!player.hasPotionEffect(PotionEffectType.SLOW))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false));
-                        if (!player.hasPotionEffect(PotionEffectType.POISON))
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 1, false, false));
-                    } else {
+                    if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
                         player.removePotionEffect(PotionEffectType.BLINDNESS);
                         player.removePotionEffect(PotionEffectType.CONFUSION);
                         player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
                         player.removePotionEffect(PotionEffectType.SLOW);
                         player.removePotionEffect(PotionEffectType.POISON);
+                    } else {
+                        if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000000, 0, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW_DIGGING))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 10000000, 4, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.SLOW))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10000000, 2, false, false, false));
+                        if (!player.hasPotionEffect(PotionEffectType.POISON))
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 10000000, 1, false, false, false));
                     }
                 }
             }

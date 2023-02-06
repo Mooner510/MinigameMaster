@@ -85,7 +85,7 @@ public class TokenGUI {
         inventory.setItem(12, createItem(Material.IRON_CHESTPLATE, Math.max(modifier.getLevel(PlayerAttribute.DEFENSE), 1),
                 "&aDefense Boost " + rome(modifier.getLevel(PlayerAttribute.DEFENSE)),
                 "&7플레이어로부터 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
-                "&7레벨당 &4Critical Master&7를 &a0.9&7레벨 억제합니다.",
+                "&7레벨당 &4Critical Master&7를 &a0.5&7레벨 억제합니다.",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DEFENSE)) + " Token"));
 

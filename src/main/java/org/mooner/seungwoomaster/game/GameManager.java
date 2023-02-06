@@ -19,6 +19,7 @@ import org.mooner.seungwoomaster.game.shop.ArmorTier;
 import org.mooner.seungwoomaster.game.shop.Shop;
 import org.mooner.seungwoomaster.game.shop.Values;
 import org.mooner.seungwoomaster.game.shop.WeaponTier;
+import org.mooner.seungwoomaster.game.total.Total;
 import org.mooner.seungwoomaster.game.upgrade.TokenGUI;
 
 import java.util.*;
@@ -48,6 +49,7 @@ public class GameManager {
     private Map<UUID, ArmorTier> bottomArmorTierMap;
     private Map<UUID, Healing> healingMap;
     private Set<UUID> readySet;
+    private Total total;
     //    private Map<UUID,>
     private Shop shop;
     private EventManager eventManager;
@@ -77,6 +79,7 @@ public class GameManager {
         topArmorTierMap = new HashMap<>();
         bottomArmorTierMap = new HashMap<>();
         healingMap = new HashMap<>();
+        total = new Total();
         for (Player player : Bukkit.getOnlinePlayers()) healingMap.put(player.getUniqueId(), new Healing(player));
         round = 0;
         PlayMap[] maps = PlayMap.values();
@@ -115,7 +118,10 @@ public class GameManager {
     }
 
     public void stop() {
+        total.send();
+
         start = false;
+        tokenMap = null;
         defensePlayer = null;
         coin = null;
         damageMap = null;
@@ -124,12 +130,18 @@ public class GameManager {
         axeTierMap = null;
         topArmorTierMap = null;
         bottomArmorTierMap = null;
+        healingMap = null;
+        total = null;
 
         Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().clear());
         HandlerList.unregisterAll(shop);
         HandlerList.unregisterAll(eventManager);
         shop = null;
         eventManager = null;
+    }
+
+    public Total getTotal() {
+        return total;
     }
 
     public PlayMap getPlayMap() {
@@ -176,51 +188,47 @@ public class GameManager {
                     .toList();
 
             for (Player player : Bukkit.getOnlinePlayers()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false));
+                player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1, 1);
+
                 if (isAttackPlayer(player)) {
-                    player.sendMessage(chat(coin(player, 3500, damageList.indexOf(player.getUniqueId()))));
+                    player.sendTitle(chat("&aYou Win!"), "", 40, 60, 100);
+                    player.sendMessage(chat(coin(player, 4000, damageList.indexOf(player.getUniqueId()))));
                     player.sendMessage(chat("    &5Ability Token x24"));
+                    addToken(player, 24);
+                    fireWorkSound(player);
                 } else {
-                    player.sendMessage(chat(coin(player, 2000, damageList.indexOf(player.getUniqueId()))));
+                    player.setGameMode(GameMode.SPECTATOR);
+                    player.sendTitle(chat("&cYou Lose..."), "", 40, 60, 100);
+                    player.sendMessage(chat(coin(player, 3500, -1)));
                     player.sendMessage(chat("    &5Ability Token x16"));
+                    addToken(player, 16);
                 }
             }
         } else {
             for (Player player : Bukkit.getOnlinePlayers()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false));
+                player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1, 1);
+
                 if (isAttackPlayer(player)) {
-                    player.sendMessage(chat(coin(player, 2000, -1)));
+                    player.setGameMode(GameMode.SPECTATOR);
+                    player.sendTitle(chat("&cYou Lose..."), "", 40, 60, 100);
+                    player.sendMessage(chat(coin(player, 3000, -1)));
                     player.sendMessage(chat("    &5Ability Token x16"));
+                    addToken(player, 16);
                 } else {
+                    player.sendTitle(chat("&aYou Win!"), "", 40, 60, 100);
                     player.sendMessage(chat(coin(player, 6000, -1)));
                     player.sendMessage(chat("    &5Ability Token x32"));
+                    addToken(player, 32);
+                    fireWorkSound(player);
                 }
             }
         }
         Bukkit.broadcastMessage(chat(" "));
         Bukkit.broadcastMessage(chat("&a■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0, false, false));
-            player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 1, 1);
-            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1, 1);
-            if (attackerWin) {
-                if (isAttackPlayer(player)) {
-                    player.sendTitle(chat("&aYou Win!"), "", 40, 60, 100);
-                    addToken(player, 16);
-                    fireWorkSound(player);
-                } else {
-                    player.sendTitle(chat("&cYou Lose..."), "", 40, 60, 100);
-                    addToken(player, 10);
-                }
-            } else {
-                if (!isAttackPlayer(player)) {
-                    player.sendTitle(chat("&aYou Win!"), "", 40, 60, 100);
-                    addToken(player, 16);
-                    fireWorkSound(player);
-                } else {
-                    player.sendTitle(chat("&cYou Lose..."), "", 40, 60, 100);
-                    addToken(player, 10);
-                }
-            }
-        });
         Bukkit.getScheduler().runTaskLater(master, this::changeDefender, 200);
     }
 
@@ -316,15 +324,20 @@ public class GameManager {
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
         onlinePlayers.forEach(p -> p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2f));
         if (readySet.size() == onlinePlayers.size()) {
-            changeTick = 5;
+            changeTick = 10;
+            Location playMapLocation = playMap.getLocation();
             onlinePlayers.forEach(p -> {
                 p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
                 p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
                 p.playSound(p, Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
                 p.playSound(p, Sound.ENTITY_PLAYER_LEVELUP, 1, 0.75f);
+                updateInventory(p);
+                p.getInventory().addItem(WeaponTier.WOOD.getSword(), WeaponTier.WOOD.getAxe());
+                if (isAttackPlayer(p)) p.teleport(getNearbySafeLocation(playMapLocation, 4, 12));
+                else p.teleport(playMapLocation);
             });
             Bukkit.broadcastMessage(chat("&e모든 플레이어가 준비를 마쳤습니다!"));
-            Location playMapLocation = playMap.getLocation();
+            Bukkit.broadcastMessage(chat("&b게임이 시작되기 전에 먼저 아이템을 구매하세요!"));
             Bukkit.getScheduler().runTaskTimer(master, bukkitTask -> {
                 if (changeTick == 0) {
                     Bukkit.getOnlinePlayers().forEach(p -> {
@@ -334,12 +347,10 @@ public class GameManager {
                         p.playSound(p, Sound.ENTITY_WOLF_HOWL, 1, 1f);
                         p.playSound(p, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
                         p.removePotionEffect(PotionEffectType.BLINDNESS);
-                        updateInventory(p);
                         getModifier(p).refresh();
                         if (isAttackPlayer(p)) p.teleport(getNearbySafeLocation(playMapLocation, 4, 12));
                         else p.teleport(playMapLocation);
                         startTime = System.currentTimeMillis();
-                        p.getInventory().addItem(WeaponTier.WOOD.getSword(), WeaponTier.WOOD.getAxe());
                         Shop.resetTimeMap();
                     });
                     bukkitTask.cancel();
