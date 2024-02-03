@@ -518,7 +518,7 @@ public class GameManager {
                 clickMessage(axeTier.ordinal(), WeaponTier.NETHERITE.ordinal())));
 
         if (isAttackPlayer(player)) {
-            player.getInventory().setItem(14, createItem(Material.PISTON, 1,
+            player.getInventory().setItem(14, createItem(Material.BLAZE_POWDER, 1,
                     "&4버서커 (Berserker)",
                     "&a10초&7간 &7가하는 피해량이 &c24%&7증가하고&7,",
                     "&7치명타 확률이 &a+20%&7 증가하며 &7치명타 피해가 &a+4%&7 증가합니다.",
@@ -532,8 +532,8 @@ public class GameManager {
             ));
             player.getInventory().setItem(15, createItem(Material.GLOW_INK_SAC, 1,
                     "&6발광제 (Glower)",
-                    "&a30초&7간 &6발광 &7합니다.",
-                    "&6발광&7효과가 지속되는 동안 기지 밖으로 나갈 수 있습니다.",
+                    "&a15초&7간 &6발광 &7합니다.",
+                    "&6발광&7효과가 지속되는 동안 기지 안으로 들어갈 수 있습니다.",
                     "&8Cooldown: &a"+Values.GLOWER.getCooltime()+"s",
                     "",
                     Values.GLOWER.toString(),

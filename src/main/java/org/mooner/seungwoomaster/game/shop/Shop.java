@@ -55,6 +55,10 @@ public class Shop implements Listener {
 
     private static boolean check(Player p, Values values) {
         Map<Values, Long> map = timeMap.get(p.getUniqueId());
+        if(map == null) {
+            timeMap.put(p.getUniqueId(), new HashMap<>());
+            map = timeMap.get(p.getUniqueId());
+        }
         Long time = map.getOrDefault(values, 0L);
         long now = System.currentTimeMillis();
         boolean b = time <= now;
@@ -75,7 +79,7 @@ public class Shop implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        timeMap.putIfAbsent(e.getPlayer().getUniqueId(), new HashMap<>());
+        timeMap.put(e.getPlayer().getUniqueId(), new HashMap<>());
     }
 
     @EventHandler

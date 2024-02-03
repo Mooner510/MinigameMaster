@@ -92,8 +92,8 @@ public class EventManager implements Listener {
         PlayerModifier defense = gameManager.getModifier(defender);
         Total total = gameManager.getTotal();
 
-        boolean berserker = berserk.getOrDefault(attacker.getUniqueId(), 0L) + 10000 <= System.currentTimeMillis();
-        boolean defBerserker = berserk.getOrDefault(defender.getUniqueId(), 0L) + 10000 <= System.currentTimeMillis();
+        boolean berserker = berserk.getOrDefault(attacker.getUniqueId(), 0L) + 10000 >= System.currentTimeMillis();
+        boolean defBerserker = berserk.getOrDefault(defender.getUniqueId(), 0L) + 10000 >= System.currentTimeMillis();
         if(berserker) attacker.playSound(attacker.getLocation(), Sound.ENTITY_WARDEN_ATTACK_IMPACT, 1, 0.5f);
 
         double damage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand()));
@@ -200,37 +200,38 @@ public class EventManager implements Listener {
 
     private final ImmutableSet<Material> swords = ImmutableSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD);
 
-//    @EventHandler  // Removed Fierce Eyes
+    @EventHandler  // Removed Fierce Eyes
     public void onInterect(PlayerInteractEvent e) {
         if (!GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
             if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (e.getItem() == null) return;
                 if (e.getItem().getType() == Material.GOLDEN_APPLE) {
                     e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
-                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60, (int) Math.floor(Math.sqrt(Bukkit.getOnlinePlayers().size()))));
+                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 600, (int) Math.floor(Math.sqrt(Bukkit.getOnlinePlayers().size()))));
                     e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.ENTITY_GENERIC_EAT, 1, 1);
                     e.getItem().setAmount(e.getItem().getAmount() - 1);
-                } else if (swords.contains(e.getItem().getType())) {
-                    if (!canUse(e.getPlayer())) {
-//                        e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + getTime(e.getPlayer()) + "s."));
-                        return;
-                    }
-                    setTime(e.getPlayer());
-                    e.getPlayer().sendMessage(chat("&eYou used &6Fierce Eyes&e!"));
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20, 0, true, true, true));
-                        }
-                    }
-
-                    Bukkit.getScheduler().runTaskLater(master, () -> {
-                        for (Player player : Bukkit.getOnlinePlayers()) {
-                            if (GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
-                                player.removePotionEffect(PotionEffectType.GLOWING);
-                            }
-                        }
-                    }, 100);
                 }
+//                else if (swords.contains(e.getItem().getType())) {
+//                    if (!canUse(e.getPlayer())) {
+////                        e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + getTime(e.getPlayer()) + "s."));
+//                        return;
+//                    }
+//                    setTime(e.getPlayer());
+//                    e.getPlayer().sendMessage(chat("&eYou used &6Fierce Eyes&e!"));
+//                    for (Player player : Bukkit.getOnlinePlayers()) {
+//                        if (GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
+//                            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20, 0, true, true, true));
+//                        }
+//                    }
+//
+//                    Bukkit.getScheduler().runTaskLater(master, () -> {
+//                        for (Player player : Bukkit.getOnlinePlayers()) {
+//                            if (GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
+//                                player.removePotionEffect(PotionEffectType.GLOWING);
+//                            }
+//                        }
+//                    }, 100);
+//                }
             }
         }
     }

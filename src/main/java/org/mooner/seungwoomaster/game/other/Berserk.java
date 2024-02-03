@@ -21,6 +21,7 @@ public class Berserk {
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             if(preTime <= 0) {
                 enable(p);
+                task.cancel();
                 return;
             }
             p.sendMessage(chat("&c" + preTime-- + "초 &e후 &c버서커&7가 해제됩니다."));
@@ -30,15 +31,19 @@ public class Berserk {
 
     private void enable(Player p) {
         Bukkit.broadcastMessage(chat(" \n  " + p.getDisplayName() + "&7이(가) &c버서커의 포효&7를 느낍니다!\n"));
-        p.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1, 1.5f);
-        p.playSound(p.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 1, 1.5f);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1, 1.5f);
+            player.playSound(p.getLocation(), Sound.ENTITY_WARDEN_EMERGE, 1, 1.5f);
+        }
         EventManager.berserk.put(p.getUniqueId(), System.currentTimeMillis());
 
         p.getInventory().setHelmet(new ItemStack(Material.DRAGON_HEAD));
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             p.spawnParticle(Particle.CRIT_MAGIC, p.getLocation().clone().add(0, 1, 0), 20, 0.2, 0.2, 0.2);
             if(time-- <= 1) {
-                p.playSound(p.getLocation(), Sound.ENTITY_WARDEN_DEATH, 1, 1);
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.playSound(p.getLocation(), Sound.ENTITY_WARDEN_DEATH, 1, 1);
+                }
                 GameManager.getInstance().reloadArmor(p);
                 task.cancel();
             }

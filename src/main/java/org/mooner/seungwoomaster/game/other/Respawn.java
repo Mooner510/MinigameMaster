@@ -19,12 +19,12 @@ public class Respawn {
         time = 6;
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             if(time-- <= 1) {
-                player.sendTitle(chat("&aRESPAWNED!"), "", 20, 60, 20);
+                player.sendTitle(chat("&a살아났농!!"), "", 20, 60, 20);
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(getNearbySafeLocation(GameManager.getInstance().getPlayMap().getLocation(), 4, 12));
                 task.cancel();
             } else {
-                player.sendTitle(chat("&cYOU DIED!"), chat("&eYou will respawn in &c" + time + " &eseconds!"), 0, 22, 0);
+                player.sendTitle(chat("&c에휴 죽었농!"), chat("&e부활은 &c" + time + " &e초 후에!"), 0, 22, 0);
             }
         }, 0, 20);
     }
