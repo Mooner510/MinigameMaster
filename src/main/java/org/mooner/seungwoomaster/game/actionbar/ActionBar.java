@@ -51,6 +51,14 @@ public class ActionBar {
                     return;
                 }
                 Location location = player.getLocation();
+                if (player.hasPotionEffect(PotionEffectType.GLOWING)) {
+                    player.removePotionEffect(PotionEffectType.BLINDNESS);
+                    player.removePotionEffect(PotionEffectType.CONFUSION);
+                    player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                    player.removePotionEffect(PotionEffectType.SLOW);
+                    player.removePotionEffect(PotionEffectType.POISON);
+                    return;
+                }
                 if(gameManager.isAttackPlayer(player)) {
 //                    Bukkit.broadcastMessage("x: " + Math.abs(loc.getX() - player.getLocation().getX()) + " / z: " + Math.abs(loc.getZ() - player.getLocation().getZ()));
                     if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
@@ -72,14 +80,6 @@ public class ActionBar {
                         player.removePotionEffect(PotionEffectType.POISON);
                     }
                 } else {
-                    if (player.hasPotionEffect(PotionEffectType.GLOWING)) {
-                        player.removePotionEffect(PotionEffectType.BLINDNESS);
-                        player.removePotionEffect(PotionEffectType.CONFUSION);
-                        player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-                        player.removePotionEffect(PotionEffectType.SLOW);
-                        player.removePotionEffect(PotionEffectType.POISON);
-                        return;
-                    }
                     if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
                         player.removePotionEffect(PotionEffectType.BLINDNESS);
                         player.removePotionEffect(PotionEffectType.CONFUSION);

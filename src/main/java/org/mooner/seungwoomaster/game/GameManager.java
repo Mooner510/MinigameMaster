@@ -776,6 +776,7 @@ public class GameManager {
     }
 
     public void addMoney(Player player, int amount) {
+        if(!isAttackPlayer(player)) amount *= 1.1;
         amount *= 1 + getModifier(player).getValue(PlayerAttribute.COIN_BOOST);
         coin.merge(player.getUniqueId(), amount, Integer::sum);
     }
