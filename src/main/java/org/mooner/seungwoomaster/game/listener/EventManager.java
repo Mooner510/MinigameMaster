@@ -93,13 +93,14 @@ public class EventManager implements Listener {
         Total total = gameManager.getTotal();
 
         boolean berserker = berserk.getOrDefault(attacker.getUniqueId(), 0L) + 10000 <= System.currentTimeMillis();
+        boolean defBerserker = berserk.getOrDefault(defender.getUniqueId(), 0L) + 10000 <= System.currentTimeMillis();
         if(berserker) attacker.playSound(attacker.getLocation(), Sound.ENTITY_WARDEN_ATTACK_IMPACT, 1, 0.5f);
 
         double damage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand()));
 
-        if (Math.random() < defense.getValue(PlayerAttribute.DODGE)) {
-            attacker.playSound(attacker, Sound.ENTITY_IRON_GOLEM_REPAIR, 1, 2);
-            defender.playSound(defender, Sound.ENTITY_IRON_GOLEM_REPAIR, 1, 2);
+        if (!defBerserker && Math.random() < defense.getValue(PlayerAttribute.DODGE)) {
+            attacker.playSound(attacker, Sound.ENTITY_IRON_GOLEM_REPAIR, 0.4f, 2);
+            defender.playSound(defender, Sound.ENTITY_IRON_GOLEM_REPAIR, 0.4f, 2);
             attacker.sendTitle(" ", chat("&7MISS"), 2, 6, 3);
             defender.sendTitle(" ", chat("&9Dodged from " + attacker.getName() + "!"), 2, 15, 3);
             e.setDamage(0);
@@ -111,7 +112,7 @@ public class EventManager implements Listener {
 
         double criticalMultiplier = 0;
         if (Math.random() < (attack.getValue(PlayerAttribute.CRITICAL_CHANCE) + (berserker ? 0.2 : 0))) {
-            criticalMultiplier += PlayerAttribute.CRITICAL_DAMAGE.getValue() * Math.max(0, attack.getLevel(PlayerAttribute.CRITICAL_DAMAGE) - defense.getLevel(PlayerAttribute.DEFENSE) * 0.5);
+            criticalMultiplier += PlayerAttribute.CRITICAL_DAMAGE.getValue() * (Math.max(0, attack.getLevel(PlayerAttribute.CRITICAL_DAMAGE) - defense.getLevel(PlayerAttribute.DEFENSE) * 0.5)) + (berserker ? 0.04 : 0);
             if(criticalMultiplier > 0) {
                 attacker.playSound(attacker, Sound.BLOCK_ANVIL_LAND, 0.4f, 0.8f + (float) (Math.random() - 0.5f) * 0.2f);
                 defender.playSound(defender, Sound.BLOCK_ANVIL_LAND, 0.4f, 0.8f + (float) (Math.random() - 0.5f) * 0.2f);
