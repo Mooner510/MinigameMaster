@@ -518,8 +518,26 @@ public class GameManager {
                 clickMessage(axeTier.ordinal(), WeaponTier.NETHERITE.ordinal())));
 
         if (isAttackPlayer(player)) {
-            player.getInventory().setItem(14, createItem(Material.BARRIER, 1, " "));
-            player.getInventory().setItem(15, createItem(Material.BARRIER, 1, " "));
+            player.getInventory().setItem(14, createItem(Material.PISTON, 1,
+                    "&4버서커 (Berserker)",
+                    "&a10초&7간 &7가하는 피해량이 &c24%&7증가하고&7,",
+                    "&7치명타 확률이 &a+20%&7 증가합니다.",
+                    "&8Cooldown: &a"+Values.BERSERK.getCooltime()+"s",
+                    "",
+                    Values.BERSERK.toString(),
+                    "",
+                    "&e클릭해 사용하세요!"
+            ));
+            player.getInventory().setItem(15, createItem(Material.GLOW_INK_SAC, 1,
+                    "&6발광제 (Glower)",
+                    "&a30초&7간 &6발광 &7합니다.",
+                    "&6발광&7효과가 지속되는 동안 기지 밖으로 나갈 수 있습니다.",
+                    "&8Cooldown: &a"+Values.GLOWER.getCooltime()+"s",
+                    "",
+                    Values.GLOWER.toString(),
+                    "",
+                    "&e클릭해 사용하세요!"
+            ));
             player.getInventory().setItem(16, createItem(Material.BARRIER, 1, " "));
             player.getInventory().setItem(17, createItem(Material.BARRIER, 1, " "));
         } else {

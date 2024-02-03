@@ -15,6 +15,7 @@ public enum Values {
     DIAMOND_ARMOR(950),
     NETHERITE_ARMOR(2500),
 
+    BERSERK(1000, true, 40),
     PISTON(600, true, 20),
     GLOWER(800, true, 60),
     FIRE_FORCE(350, true, 15),

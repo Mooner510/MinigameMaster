@@ -31,11 +31,8 @@ public class PlayerModifier {
         double additive = 0;
         if(attribute == PlayerAttribute.DEFENSE) {
             GameManager gameManager = GameManager.getInstance();
-            if(gameManager.isAttackPlayer(uuid)) {
-                additive += gameManager.getTopArmorTier(uuid).ordinal() * 0.05 + gameManager.getBottomArmorTier(uuid).ordinal() * 0.05;
-            } else {
-                additive += gameManager.getTopArmorTier(uuid).ordinal() * 0.075 + gameManager.getBottomArmorTier(uuid).ordinal() * 0.075;
-            }
+            additive += gameManager.getBottomArmorTier(uuid).ordinal() * 0.05 + gameManager.getTopArmorTier(uuid).ordinal() * (gameManager.isAttackPlayer(uuid) ? 0.025 : 0.05);
+            return Math.min(0.99, attributeMap.getOrDefault(attribute, 0) * attribute.getValue() + additive);
         }
         return attributeMap.getOrDefault(attribute, 0) * attribute.getValue() + additive;
     }

@@ -27,7 +27,7 @@ public class ActionBar {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 PlayerModifier modifier = gameManager.getModifier(player);
                 String builder = "&c" + parseString(player.getHealth(), 1) + '/' + parseString(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue(), 1) + "{hp}" +
-                        "    &aDEF " + parseString(Math.min(modifier.getValue(PlayerAttribute.DEFENSE) * 100, 99.9)) + '%' +
+                        "    &aDEF " + parseString(modifier.getValue(PlayerAttribute.DEFENSE)) + '%' +
                         (gameManager.getStartTime() != 0 ? ("    &b" + calcTime(gameManager.getStartTime(), 180)) : "") +
                         "    &6" + gameManager.getMoney(player) + " Coins" +
                         "    &5" + gameManager.getToken(player) + " Tokens";

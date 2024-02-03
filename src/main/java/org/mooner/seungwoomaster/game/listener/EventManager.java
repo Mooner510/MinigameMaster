@@ -33,10 +33,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
-import static org.mooner.seungwoomaster.MoonerUtils.parseString;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class EventManager implements Listener {
+    public static Map<UUID, Long> berserk = new HashMap<>();
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player defender) {
@@ -60,8 +61,9 @@ public class EventManager implements Listener {
     public void onFinal(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player) {
             if (e.getDamager() instanceof Player attacker) {
-                if (!e.isCancelled())
-                    GameManager.getInstance().addMoney(attacker, (int) Math.ceil((e.getFinalDamage() * 80 * (GameManager.getInstance().isAttackPlayer(attacker) ? 1 : 3)) / (e.getFinalDamage() + 30)));
+                if (!e.isCancelled()) {
+                    GameManager.getInstance().addMoney(attacker, (int) Math.ceil((e.getDamage() * 100) / (e.getDamage() + 30)));
+                }
             }
         }
     }
@@ -90,10 +92,14 @@ public class EventManager implements Listener {
         PlayerModifier defense = gameManager.getModifier(defender);
         Total total = gameManager.getTotal();
 
-        double baseDamage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand()));
-        double damage = baseDamage;
+        boolean berserker = berserk.getOrDefault(attacker.getUniqueId(), 0L) + 10000 <= System.currentTimeMillis();
+        if(berserker) attacker.playSound(attacker.getLocation(), Sound.ENTITY_WARDEN_ATTACK_IMPACT, 1, 0.5f);
+
+        double damage = (e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE ? 5 : getToolDamage(attacker.getInventory().getItemInMainHand()));
 
         if (Math.random() < defense.getValue(PlayerAttribute.DODGE)) {
+            attacker.playSound(attacker, Sound.ENTITY_IRON_GOLEM_REPAIR, 1, 2);
+            defender.playSound(defender, Sound.ENTITY_IRON_GOLEM_REPAIR, 1, 2);
             attacker.sendTitle(" ", chat("&7MISS"), 2, 6, 3);
             defender.sendTitle(" ", chat("&9Dodged from " + attacker.getName() + "!"), 2, 15, 3);
             e.setDamage(0);
@@ -101,12 +107,14 @@ public class EventManager implements Listener {
             return;
         }
 
-        double additiveMultiplier = attack.getValue(PlayerAttribute.MELEE_ATTACK) + (!gameManager.isAttackPlayer(attacker) ? 0.1 : 0);
+        double additiveMultiplier = attack.getValue(PlayerAttribute.MELEE_ATTACK) + (berserker ? 0.24 : 0);
 
         double criticalMultiplier = 0;
-        if (Math.random() < attack.getValue(PlayerAttribute.CRITICAL_CHANCE)) {
+        if (Math.random() < (attack.getValue(PlayerAttribute.CRITICAL_CHANCE) + (berserker ? 0.2 : 0))) {
             criticalMultiplier += PlayerAttribute.CRITICAL_DAMAGE.getValue() * Math.max(0, attack.getLevel(PlayerAttribute.CRITICAL_DAMAGE) - defense.getLevel(PlayerAttribute.DEFENSE) * 0.5);
             if(criticalMultiplier > 0) {
+                attacker.playSound(attacker, Sound.BLOCK_ANVIL_LAND, 0.4f, 0.8f + (float) (Math.random() - 0.5f) * 0.2f);
+                defender.playSound(defender, Sound.BLOCK_ANVIL_LAND, 0.4f, 0.8f + (float) (Math.random() - 0.5f) * 0.2f);
                 attacker.sendTitle(" ", chat("&4{cc} CRITICAL! {cc}"), 3, 5, 15);
                 defender.sendTitle(" ", chat("&c{cc} Critical by " + attacker.getName() + "! {cc}"), 3, 5, 15);
             }
@@ -117,7 +125,8 @@ public class EventManager implements Listener {
         total.addCritical(attacker, damage * criticalMultiplier);
         total.addGainDamage(defender, damage * (1 + additiveMultiplier + criticalMultiplier));
         total.addDefenced(defender, damage * reducedMultiplier);
-        damage = damage * Math.max(0.01, 1 + additiveMultiplier + criticalMultiplier - reducedMultiplier);
+        if(criticalMultiplier - reducedMultiplier > 0) damage *= (1 + additiveMultiplier * (criticalMultiplier - reducedMultiplier));
+        else damage *= (1 + criticalMultiplier - reducedMultiplier);
         e.setDamage(damage);
 
         // DEBUG MODE
@@ -167,14 +176,14 @@ public class EventManager implements Listener {
             if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.SATIATED) {
                 e.setCancelled(true);
             } else if (e.getRegainReason() == EntityRegainHealthEvent.RegainReason.MAGIC_REGEN) {
-                if (!GameManager.getInstance().isAttackPlayer(e.getEntity().getUniqueId())) {
+                if (GameManager.getInstance().isAttackPlayer(e.getEntity().getUniqueId())) {
                     e.setAmount(e.getAmount() * 2);
                 }
             }
         }
     }
 
-    private Map<UUID, Long> fierceEyesTime = new HashMap<>();
+    private final Map<UUID, Long> fierceEyesTime = new HashMap<>();
 
     private boolean canUse(Player player) {
         return fierceEyesTime.getOrDefault(player.getUniqueId(), 0L) < System.currentTimeMillis();
@@ -190,26 +199,26 @@ public class EventManager implements Listener {
 
     private final ImmutableSet<Material> swords = ImmutableSet.of(Material.WOODEN_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLDEN_SWORD, Material.DIAMOND_SWORD, Material.NETHERITE_SWORD);
 
-    @EventHandler
+//    @EventHandler  // Removed Fierce Eyes
     public void onInterect(PlayerInteractEvent e) {
         if (!GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
             if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (e.getItem() == null) return;
                 if (e.getItem().getType() == Material.GOLDEN_APPLE) {
                     e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
-                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1200, (int) Math.ceil(Math.sqrt(Bukkit.getOnlinePlayers().size()))));
+                    e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60, (int) Math.floor(Math.sqrt(Bukkit.getOnlinePlayers().size()))));
                     e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.ENTITY_GENERIC_EAT, 1, 1);
                     e.getItem().setAmount(e.getItem().getAmount() - 1);
                 } else if (swords.contains(e.getItem().getType())) {
                     if (!canUse(e.getPlayer())) {
-                        e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + getTime(e.getPlayer()) + "s."));
+//                        e.getPlayer().sendMessage(chat("&cThis ability is on cooldown for &c" + getTime(e.getPlayer()) + "s."));
                         return;
                     }
                     setTime(e.getPlayer());
                     e.getPlayer().sendMessage(chat("&eYou used &6Fierce Eyes&e!"));
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         if (GameManager.getInstance().isAttackPlayer(e.getPlayer())) {
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 0, false, false, false));
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20, 0, true, true, true));
                         }
                     }
 
@@ -246,11 +255,11 @@ public class EventManager implements Listener {
             case NETHERITE_SWORD -> 5;
 
             case WOODEN_AXE -> 2.5;
-            case STONE_AXE -> 3;
-            case IRON_AXE -> 3.5;
-            case GOLDEN_AXE -> 4;
-            case DIAMOND_AXE -> 5;
-            case NETHERITE_AXE -> 6;
+            case STONE_AXE -> 3.5;
+            case IRON_AXE -> 4;
+            case GOLDEN_AXE -> 5;
+            case DIAMOND_AXE -> 6;
+            case NETHERITE_AXE -> 7;
 
 //            case WOODEN_SWORD -> 3;
 //            case STONE_SWORD -> 3.5;

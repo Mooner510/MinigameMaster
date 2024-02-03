@@ -32,7 +32,7 @@ public class HowToPlay {
 
             inventory.setItem(10, createItem(Material.IRON_SWORD, 1, "&cAttacker",
                     "&c공격자&7는, &a방어자&7를 &e5분&7 내에 죽여야 합니다!",
-                    "&a방어자&7를 죽인 &c공격자&7는, &6800코인&7을 추가로 획득합니다!"
+                    "&a방어자&7를 죽인 &c공격자&7는, &6800코인&7을 추가로 획득합니다!",
 //                    "",
 //                    "&f기본 아이템:",
 //                    "  &f• &dElytra &9(Unbreakable)",
@@ -42,6 +42,13 @@ public class HowToPlay {
 //                    "  &f• &cFire Force",
 //                    "  &f• &5Ender Pearl",
 //                    "  &f• &8Darkness Blast"
+                    "",
+                    "&f유틸리티 아이템:",
+                    "  &f• &4Berserker",
+                    "  &f• &6Glower"
+//                    "  &f• &cFire Force",
+//                    "  &f• &8Darkness Blast",
+//                    "  &f• &8Invisibility Cloak"
             ));
 
             inventory.setItem(13, createItem(Material.DIAMOND, 1, "&bWin / Lose / End",
@@ -70,11 +77,11 @@ public class HowToPlay {
                     "&a방어자&7는, &c공격자&7로부터 &e5분&7동안",
                     "생존해야 합니다!",
                     "&a방어자&7는, 공격력이 항상 &c15%&7상승합니다.",
-                    "",
-                    "&6Sword Ability: Fierce Eyes",
-                    "&a방어자&7는 검을 들고 우클릭 할 경우 &a5초간",
-                    "모든 &c공격자&7에게 &e발광&7효과를 적용합니다.",
-                    "&8Cooldown: &a15s",
+//                    "",
+//                    "&6Sword Ability: Fierce Eyes",
+//                    "&a방어자&7는 검을 들고 우클릭 할 경우 &a5초간",
+//                    "모든 &c공격자&7에게 &e발광&7효과를 적용합니다.",
+//                    "&8Cooldown: &a15s",
                     "",
                     "&f기본 지급:",
                     "  &f• &cHealth {hp} 공격자 + 1배",
@@ -83,8 +90,8 @@ public class HowToPlay {
                     "  &f• &dPiston Smash",
                     "  &f• &6Glower",
                     "  &f• &cFire Force",
-                    "  &f• &8Darkness Blast",
-                    "  &f• &8Invisibility Cloak"
+                    "  &f• &8Darkness Blast"
+//                    "  &f• &8Invisibility Cloak"
             ));
 
             inventory.setItem(21, createItem(Material.GOLD_NUGGET, 1, "&6Coin",

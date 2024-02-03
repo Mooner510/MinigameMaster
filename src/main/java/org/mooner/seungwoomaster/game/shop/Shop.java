@@ -8,14 +8,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
+import org.mooner.seungwoomaster.game.listener.EventManager;
+import org.mooner.seungwoomaster.game.other.Berserk;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mooner.seungwoomaster.MoonerUtils.chat;
 import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
@@ -43,14 +47,15 @@ public class Shop implements Listener {
 
     private final ItemStack fireball = createItem(Material.FIRE_CHARGE, 1, "&3Fireball");
 
-    private static Map<Values, Long> timeMap;
+    private static Map<UUID, Map<Values, Long>> timeMap;
 
     public static void resetTimeMap() {
         timeMap = new HashMap<>();
     }
 
     private static boolean check(Player p, Values values) {
-        Long time = timeMap.getOrDefault(values, 0L);
+        Map<Values, Long> map = timeMap.get(p.getUniqueId());
+        Long time = map.getOrDefault(values, 0L);
         long now = System.currentTimeMillis();
         boolean b = time <= now;
         if(!b) {
@@ -60,8 +65,17 @@ public class Shop implements Listener {
         return b;
     }
 
-    private static void setTime(Values values) {
-        timeMap.put(values, System.currentTimeMillis() + values.getCooltime() * 1000L);
+    private static void setTime(Player p, Values values) {
+        if(GameManager.getInstance().isAttackPlayer(p) && values == Values.GLOWER) {
+            timeMap.get(p.getUniqueId()).put(values, System.currentTimeMillis() + values.getCooltime() * 500L);
+        } else {
+            timeMap.get(p.getUniqueId()).put(values, System.currentTimeMillis() + values.getCooltime() * 1000L);
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        timeMap.putIfAbsent(e.getPlayer().getUniqueId(), new HashMap<>());
     }
 
     @EventHandler
@@ -160,6 +174,10 @@ public class Shop implements Listener {
             Player defensePlayer = gameManager.getDefensePlayer();
             switch (e.getSlot()) {
                 case 14 -> {
+                    if(gameManager.isAttackPlayer(p)) {
+                        new Berserk(p);
+                        return;
+                    }
                     if (check(p, Values.PISTON) && gameManager.removeMoney(p, Values.PISTON.getMoney())) {
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (gameManager.isAttackPlayer(player)) {
@@ -169,20 +187,25 @@ public class Shop implements Listener {
                                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 1, 0.5f);
                             }
                         }
-                        Shop.setTime(Values.PISTON);
+                        Shop.setTime(p, Values.PISTON);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
                 }
                 case 15 -> {
                     if (check(p, Values.GLOWER) && gameManager.removeMoney(p, Values.GLOWER.getMoney())) {
-                        defensePlayer.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 600, 0, true, true, true));
-                        Shop.setTime(Values.GLOWER);
+                        if(gameManager.isAttackPlayer(p)) {
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300, 0, true, true, true));
+                        } else {
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 600, 0, true, true, true));
+                        }
+                        Shop.setTime(p, Values.GLOWER);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
                 }
                 case 16 -> {
+                    if(gameManager.isAttackPlayer(p)) return;
                     if (check(p, Values.FIRE_FORCE) && gameManager.removeMoney(p, Values.FIRE_FORCE.getMoney())) {
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (gameManager.isAttackPlayer(player)) {
@@ -190,12 +213,13 @@ public class Shop implements Listener {
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BLAZE_SHOOT, 1, 0.5f);
                             }
                         }
-                        Shop.setTime(Values.FIRE_FORCE);
+                        Shop.setTime(p, Values.FIRE_FORCE);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
                 }
                 case 17 -> {
+                    if(gameManager.isAttackPlayer(p)) return;
                     if (check(p, Values.DARKNESS_BLAST) && gameManager.removeMoney(p, Values.DARKNESS_BLAST.getMoney())) {
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (gameManager.isAttackPlayer(player)) {
@@ -204,7 +228,7 @@ public class Shop implements Listener {
                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1, 0.5f);
                             }
                         }
-                        Shop.setTime(Values.DARKNESS_BLAST);
+                        Shop.setTime(p, Values.DARKNESS_BLAST);
                         p.sendMessage(chat(item.getItemMeta().getDisplayName() + "&a을(를) 구매했습니다."));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 2f);
                     }
