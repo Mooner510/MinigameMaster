@@ -32,18 +32,15 @@ public class GameModeGUI {
         voted = false;
         Bukkit.getScheduler().runTaskAsynchronously(master, () -> {
             this.player = player;
+            player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1, 0.5f);
 
-            inventory = Bukkit.createInventory(player, 27, "토큰 강화");
-            GameManager gameManager = GameManager.getInstance();
-            PlayerModifier modifier = gameManager.getModifier(player);
+            inventory = Bukkit.createInventory(player, 27, "게임 모드 선택");
 
             for (int i = 0; i < 26; i++) inventory.setItem(i, glass);
 
-            inventory.setItem(12, createItem(Material.GRASS_BLOCK, 1, "&a클래식 모드",
-                    "&c공격자&7와 &a방어자&7의 클래식한 전투 모드"
-            ));
-            inventory.setItem(14, createItem(Material.TOTEM_OF_UNDYING, 1, "&d직업 모드",
-                    "&b직업&7을 가져 특수 능력을 사용하는 대난투 모드"));
+            inventory.setItem(12, createItem(Material.GRASS_BLOCK, 1, "&a클래식 모드", "&c공격자&7와 &a방어자&7의 클래식한 전투 모드"));
+
+            inventory.setItem(14, createItem(Material.TOTEM_OF_UNDYING, 1, "&d직업 모드", "&b직업&7을 가져 특수 능력을 사용하는 대난투 모드"));
 
             Bukkit.getScheduler().runTask(master, () -> {
                 Bukkit.getPluginManager().registerEvents(listener, master);

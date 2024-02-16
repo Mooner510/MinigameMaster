@@ -62,6 +62,7 @@ public class GameManager {
     private int voteLeft;
     private int classicVote;
     private int advancedVote;
+    private boolean voteEnabled;
 
     public GameManager() {
         start = false;
@@ -69,6 +70,14 @@ public class GameManager {
 
     public boolean isClassic() {
         return isClassic;
+    }
+
+    public void setVoteEnabled(boolean voteEnabled) {
+        this.voteEnabled = voteEnabled;
+    }
+
+    public boolean isVoteEnabled() {
+        return voteEnabled;
     }
 
     public void voteClassic(Player player) {
@@ -87,6 +96,15 @@ public class GameManager {
         Bukkit.broadcastMessage(chat("&6" + player.getName() + "&a님이 게임 모드 투표를 마쳤습니다! &e( " + (players - voteLeft + 1) + " / " + players + " )"));
         onlinePlayers.forEach(p -> p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2));
         if (--voteLeft > 0) return;
+        voteRun();
+    }
+
+    public void voteRun() {
+        voteRun(-1);
+    }
+
+    public void voteRun(int idx) {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
         Random random = new Random();
         var maps = Arrays.asList("&a클래식 모드", "&d직업 모드");
         changeTick = 0;
@@ -99,10 +117,14 @@ public class GameManager {
                 });
             }
             if (changeTick > 140) {
-                int index = classicVote == advancedVote ? random.nextInt(maps.size()) : (classicVote > advancedVote ? 0 : 1);
+                int index = idx == -1 ? (classicVote == advancedVote ? random.nextInt(maps.size()) : (classicVote > advancedVote ? 0 : 1)) : idx;
                 isClassic = index == 0;
                 String name = maps.get(index);
-                Bukkit.broadcastMessage(chat("&e게임 모드: " + name + "\n  &7[ 클래식 모드 " + classicVote + "표  /  직업 모드 " + advancedVote + "표 ]"));
+                if (classicVote == 0 && advancedVote == 0) {
+                    Bukkit.broadcastMessage(chat("&e게임 모드: " + name));
+                } else {
+                    Bukkit.broadcastMessage(chat("&e게임 모드: " + name + "\n  &7[ 클래식 모드 " + classicVote + "표  /  직업 모드 " + advancedVote + "표 ]"));
+                }
                 onlinePlayers.forEach(p -> {
                     p.sendTitle(chat("&e{sp} Game Mode {sp}"), name, 10, 10, 80);
                     p.playSound(p, Sound.UI_BUTTON_CLICK, 1, 2);
@@ -187,6 +209,13 @@ public class GameManager {
         bottomArmorTierMap = null;
         healingMap = null;
         total = null;
+        isClassic = false;
+        voteLeft = 0;
+        classicVote = 0;
+        advancedVote = 0;
+        voteEnabled = false;
+        round = 0;
+        startTime = 0L;
 
         Bukkit.getOnlinePlayers().forEach(player -> player.getInventory().clear());
         HandlerList.unregisterAll(shop);

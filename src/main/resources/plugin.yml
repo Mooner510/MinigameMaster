@@ -8,5 +8,7 @@ commands:
     usage: "/start"
   shop:
     usage: "/shop"
-  set:
-    usage: "/set"
+  add:
+    usage: "/add"
+  vote:
+    usage: "/vote"

@@ -65,7 +65,9 @@ public class ClassGUI {
 
     public void update(PlayerModifier modifier) {
 
-        inventory.setItem(10, createItem(Material.BEACON, 1, "&e기사",
+        inventory.setItem(10, createItem(Material.BEACON, 1,
+                modifier.getPlayerClass() == PlayerClass.KNIGHT,
+                "&e기사",
                 "&c[ 공격자 ] &7- &6검술",
                 "가하는 치명타는 방어력을 30% 무시합니다.",
                 "",
@@ -73,7 +75,9 @@ public class ClassGUI {
                 "매 7번째 공격은 치명타 확률 100%, 치명타 피해 200% 상승합니다."
         ));
 
-        inventory.setItem(11, createItem(Material.DRAGON_BREATH, 1, "&d마법사",
+        inventory.setItem(11, createItem(Material.DRAGON_BREATH, 1,
+                modifier.getPlayerClass() == PlayerClass.WIZARD,
+                "&d마법사",
                 "치명타 확률과 근접 공격력이 50% 감소합니다.",
                 "",
                 "&c[ 공격자 ] &7- &6마법",
@@ -84,7 +88,9 @@ public class ClassGUI {
                 "매 8번째 공격은 치명타 확률 100%, 치명타 피해 200% 상승합니다."
         ));
 
-        inventory.setItem(12, createItem(Material.BEACON, 1, "&6뱀파이어",
+        inventory.setItem(12, createItem(Material.BEACON, 1,
+                modifier.getPlayerClass() == PlayerClass.VAMPIRE,
+                "&6뱀파이어",
                 "&c[ 공격자 ] &7- &6흡혈",
                 "가한 최종 피해량의 &a13% &7만큼 회복합니다.",
                 "",
@@ -95,6 +101,7 @@ public class ClassGUI {
         ));
 
         inventory.setItem(13, createItem(Material.NETHERITE_SCRAP, 1,
+                modifier.getPlayerClass() == PlayerClass.BOXER,
                 "&b복서",
                 "받는 피해가 20% 증가합니다.",
                 "주먹으로 공격시 첫 공격과 두 번째 공격 사이의 시간이 80% 감소합니다.",
@@ -107,7 +114,9 @@ public class ClassGUI {
                 "대상이 부활할 경우 증가한 피해량은 초기화됩니다."
         ));
 
-        inventory.setItem(14, createItem(Material.BEACON, 1, "&a고블린",
+        inventory.setItem(14, createItem(Material.BEACON, 1,
+                modifier.getPlayerClass() == PlayerClass.GOBLIN,
+                "&a고블린",
                 "&c[ 공격자 ] &7- &6금품 갈취",
                 "방어자가 소모형 아이템을 소지하고 있고 버서커 상태가 아닐 경우",
                 "크리티컬 발생시 50% 확률로 소모형 아이템 한 개를 빼앗습니다.",
@@ -116,7 +125,9 @@ public class ClassGUI {
                 "&6가한 최종 피해량의 11배 &7만큼 상대의 돈을 빼앗습니다."
         ));
 
-        inventory.setItem(15, createItem(Material.BEACON, 1, "&7과학자",
+        inventory.setItem(15, createItem(Material.BEACON, 1,
+                modifier.getPlayerClass() == PlayerClass.SCIENTIST,
+                "&7과학자",
                 "&c[ 공격자 ] &7- &6영역 교체",
                 "아이템을 소모하여 20초 동안 공격자와 방어자의 영역을 반전 시킵니다.",
                 "매 라운드마다 반전된 영역은 초기화 됩니다.",
@@ -126,7 +137,9 @@ public class ClassGUI {
                 "공격자를 살해할 때마다 남은 시간이 2초 감소합니다."
         ));
 
-        inventory.setItem(16, createItem(Material.COCOA_BEANS, 1, "&8니거",
+        inventory.setItem(16, createItem(Material.COCOA_BEANS, 1,
+                modifier.getPlayerClass() == PlayerClass.NIGGER,
+                "&8니거",
                 "&c[ 공격자 ] &7- &6비장의 무기",
                 "죽은 자리에 33%의 기본 확률로 폭발물을 설치합니다.",
                 "",

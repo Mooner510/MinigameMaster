@@ -3,9 +3,10 @@ package org.mooner.seungwoomaster.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.mooner.seungwoomaster.command.commands.SetCommand;
+import org.mooner.seungwoomaster.command.commands.AddCommand;
 import org.mooner.seungwoomaster.command.commands.ShopCommand;
 import org.mooner.seungwoomaster.command.commands.StartCommand;
+import org.mooner.seungwoomaster.command.commands.VoteCommand;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +20,8 @@ public class CommandManager {
         commandMap = new HashMap<>();
         commandMap.put("start", new StartCommand());
         commandMap.put("shop", new ShopCommand());
-        commandMap.put("set", new SetCommand());
+        commandMap.put("add", new AddCommand());
+        commandMap.put("vote", new VoteCommand());
     }
 
     public boolean onCommand(CommandSender sender, Command command, String[] args) {

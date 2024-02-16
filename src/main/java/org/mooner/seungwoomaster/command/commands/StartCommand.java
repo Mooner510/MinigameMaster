@@ -12,7 +12,7 @@ public class StartCommand implements ICommand {
     @Override
     public boolean execute(Player sender, String[] args) {
         if (!sender.getName().equals("Mooner510")) return false;
-        if (args.length == 0) return true;
+        if (args.length == 0) GameManager.getInstance().stop();
         GameManager.multipleRound = Integer.parseInt(args[0]);
         if (args.length == 1) GameManager.getInstance().start();
         else if (args.length == 2) GameManager.getInstance().start(PlayMap.valueOf(args[1]));

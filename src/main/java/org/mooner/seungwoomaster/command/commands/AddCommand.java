@@ -1,18 +1,14 @@
 package org.mooner.seungwoomaster.command.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.mooner.seungwoomaster.command.ICommand;
 import org.mooner.seungwoomaster.game.GameManager;
-import org.mooner.seungwoomaster.game.PlayMap;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class SetCommand implements ICommand {
+public class AddCommand implements ICommand {
     @Override
     public boolean execute(Player sender, String[] args) {
         if (!sender.getName().equals("Mooner510")) return false;
