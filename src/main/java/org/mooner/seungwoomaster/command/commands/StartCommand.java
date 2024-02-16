@@ -12,15 +12,17 @@ public class StartCommand implements ICommand {
     @Override
     public boolean execute(Player sender, String[] args) {
         if (!sender.getName().equals("Mooner510")) return false;
-        if (args.length == 1) GameManager.getInstance().start(Integer.parseInt(args[0]));
-        else if (args.length == 2) GameManager.getInstance().start(PlayMap.valueOf(args[1]), Integer.parseInt(args[0]));
+        if (args.length == 0) return true;
+        GameManager.multipleRound = Integer.parseInt(args[0]);
+        if (args.length == 1) GameManager.getInstance().start();
+        else if (args.length == 2) GameManager.getInstance().start(PlayMap.valueOf(args[1]));
         return true;
     }
 
     @Override
     public List<String> tabComplete(Player sender, String[] args) {
         if (args.length == 2)
-            return Arrays.stream(PlayMap.values()).map(Enum::toString).filter(it -> it.startsWith(args[1])).toList();
+            return Arrays.stream(PlayMap.values()).map(Enum::toString).filter(it -> it.toLowerCase().startsWith(args[1].toLowerCase())).toList();
         else return ICommand.super.tabComplete(sender, args);
     }
 }

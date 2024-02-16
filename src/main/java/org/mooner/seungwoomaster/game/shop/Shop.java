@@ -63,7 +63,7 @@ public class Shop implements Listener {
         long now = System.currentTimeMillis();
         boolean b = time <= now;
         if(!b) {
-            p.sendMessage(chat("&cThis ability is on cooldown for &c" + Math.ceil((time - now) / 1000d) + "s."));
+//            p.sendMessage(chat("&cThis ability is on cooldown for &c" + Math.ceil((time - now) / 1000d) + "s."));
             p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 0.75f, 0.5f);
         }
         return b;
@@ -179,7 +179,9 @@ public class Shop implements Listener {
             switch (e.getSlot()) {
                 case 14 -> {
                     if(gameManager.isAttackPlayer(p)) {
-                        new Berserk(p);
+                        if(check(p, Values.BERSERK) && gameManager.removeMoney(p, Values.BERSERK.getMoney())) {
+                            new Berserk(p);
+                        }
                         return;
                     }
                     if (check(p, Values.PISTON) && gameManager.removeMoney(p, Values.PISTON.getMoney())) {

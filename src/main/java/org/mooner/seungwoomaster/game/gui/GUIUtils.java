@@ -20,16 +20,24 @@ public class GUIUtils {
         return createItem(m, amount, true, name, lore);
     }
 
-    public static ItemStack createItem(Material m, int amount, boolean unbreakable, String name, String... lore) {
+    public static ItemStack createItem(Material m, int amount, boolean ench, String name, String... lore) {
+        return createItem(m, amount, ench, true, name, lore);
+    }
+
+    public static ItemStack createItem(Material m, int amount, boolean ench, boolean unbreakable, String name, String... lore) {
         ItemStack i = new ItemStack(m, amount);
         ItemMeta im = i.getItemMeta();
-        if(im != null) {
+        if (im != null) {
             im.setDisplayName(chat("&e" + name));
             im.setLore(Arrays.stream(lore)
                     .map(s -> chat("&7" + s))
                     .collect(Collectors.toList()));
             im.addItemFlags(ItemFlag.values());
             im.setUnbreakable(unbreakable);
+            if (ench) {
+                im.addEnchant(Enchantment.DURABILITY, 1, true);
+                im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
             i.setItemMeta(im);
         }
         return i;
@@ -69,7 +77,7 @@ public class GUIUtils {
         ItemMeta meta = i.getItemMeta();
         ArrayList<String> l = new ArrayList<>();
         for (String s : lore) l.add(chat(s));
-        if(meta.getLore() != null && meta.getLore().size() > 0) l.addAll(meta.getLore());
+        if (meta.getLore() != null && meta.getLore().size() > 0) l.addAll(meta.getLore());
         meta.setLore(l);
         i.setItemMeta(meta);
         return i;
@@ -79,7 +87,7 @@ public class GUIUtils {
         ItemMeta meta = i.getItemMeta();
         ArrayList<String> l = new ArrayList<>();
 
-        if(meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
+        if (meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
 
         for (String s : lore) l.add(chat(s));
         meta.setLore(l);
@@ -91,7 +99,7 @@ public class GUIUtils {
         ItemMeta meta = i.getItemMeta();
         ArrayList<String> l = new ArrayList<>();
 
-        if(meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
+        if (meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
 
         for (String s : lore) l.add(chat(s));
         meta.setLore(l);
@@ -103,7 +111,7 @@ public class GUIUtils {
         ItemMeta meta = i.getItemMeta();
         ArrayList<String> l = new ArrayList<>();
 
-        if(meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
+        if (meta.getLore() != null && meta.getLore().size() > 0) l = new ArrayList<>(meta.getLore());
 
         for (String s : lore) l.add(chat(s));
         for (String s : add) l.add(chat(s));
@@ -133,7 +141,7 @@ public class GUIUtils {
     }
 
     public static ItemStack colored(ItemStack i, int r, int g, int b) {
-        if(i.getItemMeta() instanceof LeatherArmorMeta) {
+        if (i.getItemMeta() instanceof LeatherArmorMeta) {
             LeatherArmorMeta meta = (LeatherArmorMeta) i.getItemMeta();
             meta.setColor(Color.fromRGB(r, g, b));
             i.setItemMeta(meta);
@@ -142,16 +150,16 @@ public class GUIUtils {
     }
 
     public static ItemStack colored(ItemStack i, String hex) {
-        if(i.getItemMeta() instanceof LeatherArmorMeta) {
+        if (i.getItemMeta() instanceof LeatherArmorMeta) {
             LeatherArmorMeta meta = (LeatherArmorMeta) i.getItemMeta();
-            meta.setColor(Color.fromRGB(Integer.parseInt(hex,16)));
+            meta.setColor(Color.fromRGB(Integer.parseInt(hex, 16)));
             i.setItemMeta(meta);
         }
         return i;
     }
 
     public static ItemStack colored(ItemStack i, int hex) {
-        if(i.getItemMeta() instanceof LeatherArmorMeta) {
+        if (i.getItemMeta() instanceof LeatherArmorMeta) {
             LeatherArmorMeta meta = (LeatherArmorMeta) i.getItemMeta();
             meta.setColor(Color.fromRGB(hex));
             i.setItemMeta(meta);

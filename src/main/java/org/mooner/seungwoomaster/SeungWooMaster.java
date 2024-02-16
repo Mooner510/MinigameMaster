@@ -16,6 +16,8 @@ import org.mooner.seungwoomaster.game.listener.DoorOpener;
 
 import java.util.List;
 
+import static org.mooner.seungwoomaster.MoonerUtils.chat;
+
 public final class SeungWooMaster extends JavaPlugin implements Listener {
     public static SeungWooMaster master;
     private static CommandManager commandManager;
@@ -37,8 +39,8 @@ public final class SeungWooMaster extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
-        if(e.getEntity() instanceof Player) {
-            if(!GameManager.getInstance().isStarted()) {
+        if (e.getEntity() instanceof Player) {
+            if (!GameManager.getInstance().isStarted()) {
                 e.setCancelled(true);
             }
         }

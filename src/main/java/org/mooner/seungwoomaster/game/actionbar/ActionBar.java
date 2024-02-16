@@ -10,12 +10,34 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.mooner.seungwoomaster.game.GameManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
+import org.mooner.seungwoomaster.game.modifier.PlayerClass;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 
 import static org.mooner.seungwoomaster.MoonerUtils.*;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 
 public class ActionBar {
+    public static int inverseTicks;
+
+    private static boolean isInside(Location mapLocation, Location playerLocation) {
+        boolean b = Math.abs(mapLocation.getX() - playerLocation.getX()) < 2.6 && Math.abs(mapLocation.getZ() - playerLocation.getZ()) < 2.6 && mapLocation.getY() - 1 <= playerLocation.getY() && mapLocation.getY() + 3 >= playerLocation.getY();
+        if (inverseTicks > 0) return !b;
+        return b;
+    }
+
+    public static void inverse() {
+        if (inverseTicks <= 0) {
+            inverseTicks = 400;
+            Bukkit.getScheduler().runTaskTimer(master, task -> {
+                if (inverseTicks-- <= 0) {
+                    task.cancel();
+                }
+            }, 0, 1);
+            return;
+        }
+        inverseTicks = 400;
+    }
+
     public static void runActionBar() {
         GameManager gameManager = GameManager.getInstance();
 
@@ -43,7 +65,7 @@ public class ActionBar {
                 return;
             }
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if(gameManager.getStartTime() == 0) {
+                if (gameManager.getStartTime() == 0) {
                     player.removePotionEffect(PotionEffectType.CONFUSION);
                     player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
                     player.removePotionEffect(PotionEffectType.SLOW);
@@ -59,9 +81,9 @@ public class ActionBar {
                     player.removePotionEffect(PotionEffectType.POISON);
                     return;
                 }
-                if(gameManager.isAttackPlayer(player)) {
+                if (gameManager.isAttackPlayer(player)) {
 //                    Bukkit.broadcastMessage("x: " + Math.abs(loc.getX() - player.getLocation().getX()) + " / z: " + Math.abs(loc.getZ() - player.getLocation().getZ()));
-                    if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
+                    if (isInside(loc, location)) {
                         if (!player.hasPotionEffect(PotionEffectType.BLINDNESS))
                             player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000000, 0, false, false, false));
                         if (!player.hasPotionEffect(PotionEffectType.CONFUSION))
@@ -80,7 +102,19 @@ public class ActionBar {
                         player.removePotionEffect(PotionEffectType.POISON);
                     }
                 } else {
-                    if (Math.abs(loc.getX() - location.getX()) < 2.6 && Math.abs(loc.getZ() - location.getZ()) < 2.6 && loc.getY() - 1 <= location.getY() && loc.getY() + 3 >= location.getY()) {
+                    PlayerModifier modifier = gameManager.getModifier(player);
+                    if (!gameManager.isClassic()) {
+                        if (modifier.getPlayerClass() == PlayerClass.NIGGER) {
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 1000000, 0, false, false, false));
+                            player.removePotionEffect(PotionEffectType.BLINDNESS);
+                            player.removePotionEffect(PotionEffectType.CONFUSION);
+                            player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                            player.removePotionEffect(PotionEffectType.SLOW);
+                            player.removePotionEffect(PotionEffectType.POISON);
+                            return;
+                        }
+                    }
+                    if (isInside(loc, location)) {
                         player.removePotionEffect(PotionEffectType.BLINDNESS);
                         player.removePotionEffect(PotionEffectType.CONFUSION);
                         player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
@@ -107,7 +141,7 @@ public class ActionBar {
                 task.cancel();
                 return;
             }
-            if(gameManager.getStartTime() != 0 && gameManager.getStartTime() + 180000 <= System.currentTimeMillis()) {
+            if (gameManager.getStartTime() != 0 && gameManager.getStartTime() + 180000 <= System.currentTimeMillis()) {
                 gameManager.end(false);
             }
         }, 0, 1);

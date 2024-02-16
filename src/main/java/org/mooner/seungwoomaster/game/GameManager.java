@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.Team;
 import org.mooner.seungwoomaster.game.actionbar.ActionBar;
 import org.mooner.seungwoomaster.game.listener.EventManager;
 import org.mooner.seungwoomaster.game.modifier.PlayerAttribute;
+import org.mooner.seungwoomaster.game.modifier.PlayerClass;
 import org.mooner.seungwoomaster.game.modifier.PlayerModifier;
 import org.mooner.seungwoomaster.game.other.Healing;
 import org.mooner.seungwoomaster.game.other.HowToPlay;
@@ -31,6 +32,7 @@ import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
 
 public class GameManager {
     private static final GameManager instance = new GameManager();
+    public static int multipleRound;
 
     public static GameManager getInstance() {
         return instance;
@@ -56,18 +58,70 @@ public class GameManager {
     private int round;
     private PlayMap playMap;
     private long startTime;
-    private int multipleRound;
+    private boolean isClassic;
+    private int voteLeft;
+    private int classicVote;
+    private int advancedVote;
 
     public GameManager() {
         start = false;
     }
 
-    public void start(int multipleRound) {
-        start(null, multipleRound);
+    public boolean isClassic() {
+        return isClassic;
     }
 
-    public void start(PlayMap map, int multipleRound) {
-        this.multipleRound = multipleRound;
+    public void voteClassic(Player player) {
+        classicVote++;
+        voteCheck(player);
+    }
+
+    public void voteAdvanced(Player player) {
+        advancedVote++;
+        voteCheck(player);
+    }
+
+    private void voteCheck(Player player) {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        int players = onlinePlayers.size();
+        Bukkit.broadcastMessage(chat("&6" + player.getName() + "&a님이 게임 모드 투표를 마쳤습니다! &e( " + (players - voteLeft + 1) + " / " + players + " )"));
+        onlinePlayers.forEach(p -> p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2));
+        if (--voteLeft > 0) return;
+        Random random = new Random();
+        var maps = Arrays.asList("&a클래식 모드", "&d직업 모드");
+        changeTick = 0;
+        Bukkit.getScheduler().runTaskTimer(master, task -> {
+            changeTick++;
+            if (checkTick()) {
+                onlinePlayers.forEach(p -> {
+                    p.sendTitle(chat("&bGame Mode Selecting..."), maps.get(random.nextInt(maps.size())), 0, 20, 0);
+                    p.playSound(p, Sound.UI_BUTTON_CLICK, 1, 2);
+                });
+            }
+            if (changeTick > 140) {
+                int index = classicVote == advancedVote ? random.nextInt(maps.size()) : (classicVote > advancedVote ? 0 : 1);
+                isClassic = index == 0;
+                String name = maps.get(index);
+                Bukkit.broadcastMessage(chat("&e게임 모드: " + name + "\n  &7[ 클래식 모드 " + classicVote + "표  /  직업 모드 " + advancedVote + "표 ]"));
+                onlinePlayers.forEach(p -> {
+                    p.sendTitle(chat("&e{sp} Game Mode {sp}"), name, 10, 10, 80);
+                    p.playSound(p, Sound.UI_BUTTON_CLICK, 1, 2);
+                    p.playSound(p, Sound.ENTITY_WITHER_SPAWN, 1, 2);
+                });
+                task.cancel();
+            }
+        }, 0, 1);
+    }
+
+    private boolean checkTick() {
+        return changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 90 && changeTick % 4 == 0 || changeTick > 90 && changeTick <= 110 && changeTick % 8 == 0 || changeTick > 110 && changeTick <= 140 && changeTick % 16 == 0;
+    }
+
+    public void start() {
+        start(null);
+    }
+
+    public void start(PlayMap map) {
         start = true;
         defensedPlayer = new HashSet<>();
         coin = new HashMap<>();
@@ -83,8 +137,9 @@ public class GameManager {
         for (Player player : Bukkit.getOnlinePlayers()) healingMap.put(player.getUniqueId(), new Healing(player));
         round = 0;
         PlayMap[] maps = PlayMap.values();
+        Random random = new Random();
         if (map == null) {
-            playMap = maps[new Random().nextInt(maps.length)];
+            playMap = maps[random.nextInt(maps.length)];
         } else {
             playMap = map;
         }
@@ -95,9 +150,9 @@ public class GameManager {
         changeTick = 0;
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             changeTick++;
-            if (changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 90 && changeTick % 4 == 0 || changeTick > 90 && changeTick <= 110 && changeTick % 8 == 0 || changeTick > 110 && changeTick <= 140 && changeTick % 16 == 0) {
+            if (checkTick()) {
                 Bukkit.getOnlinePlayers().forEach(player -> {
-                    player.sendTitle(chat("&dMap selecting..."), maps[new Random().nextInt(maps.length)].getName(), 0, 20, 0);
+                    player.sendTitle(chat("&dMap selecting..."), maps[random.nextInt(maps.length)].getName(), 0, 20, 0);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 1, 2);
                 });
             }
@@ -283,7 +338,7 @@ public class GameManager {
         List<? extends Player> finalPlayers = players;
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             changeTick++;
-            if (changeTick <= 40 || changeTick <= 60 && changeTick % 2 == 0 || changeTick > 60 && changeTick <= 90 && changeTick % 4 == 0 || changeTick > 90 && changeTick <= 110 && changeTick % 8 == 0 || changeTick > 110 && changeTick <= 140 && changeTick % 16 == 0) {
+            if (checkTick()) {
                 Player randomPlayer = finalPlayers.get(random.nextInt(finalPlayers.size()));
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     player.sendTitle(chat("&aDefender selecting..."), randomPlayer.getName(), 0, 20, 0);
@@ -341,13 +396,20 @@ public class GameManager {
             Bukkit.getScheduler().runTaskTimer(master, bukkitTask -> {
                 if (changeTick == 0) {
                     Bukkit.getOnlinePlayers().forEach(p -> {
+                        PlayerModifier modifier = getModifier(p);
+                        if (!isClassic()) {
+                            if (modifier.getPlayerClass() == PlayerClass.SCIENTIST) {
+                                p.getInventory().addItem(createItem(Material.DIAMOND, 4, true, "&c영역 &a교체", "들고 우클릭 하여 소모하고,", "20초간 &c공격자&7와 &a방어자&7의 영역을 &5반전&7시킵니다."));
+                            }
+                        }
+
                         p.sendTitle("", chat("&cRound Start!"), 20, 40, 60);
                         p.playSound(p, Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
                         p.playSound(p, Sound.ENTITY_PLAYER_LEVELUP, 1, 0.5f);
                         p.playSound(p, Sound.ENTITY_WOLF_HOWL, 1, 1f);
                         p.playSound(p, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
                         p.removePotionEffect(PotionEffectType.BLINDNESS);
-                        getModifier(p).refresh();
+                        modifier.refresh();
                         if (isAttackPlayer(p)) p.teleport(getNearbySafeLocation(playMapLocation, 4, 12));
                         else p.teleport(playMapLocation);
                         startTime = System.currentTimeMillis();
@@ -371,7 +433,7 @@ public class GameManager {
         if (scoreboardManager != null) {
             Scoreboard mainScoreboard = scoreboardManager.getMainScoreboard();
             Team attackTeam = mainScoreboard.getTeam("attack");
-            if(attackTeam == null) attackTeam = mainScoreboard.registerNewTeam("attack");
+            if (attackTeam == null) attackTeam = mainScoreboard.registerNewTeam("attack");
             attackTeam.setAllowFriendlyFire(false);
             attackTeam.setCanSeeFriendlyInvisibles(true);
             attackTeam.setPrefix(chat("&4Attacker "));
@@ -383,7 +445,7 @@ public class GameManager {
             Bukkit.getOnlinePlayers().forEach(player -> finalAttackTeam.addEntry(player.getName()));
 
             Team defenseTeam = mainScoreboard.getTeam("defense");
-            if(defenseTeam == null) defenseTeam = mainScoreboard.registerNewTeam("defense");
+            if (defenseTeam == null) defenseTeam = mainScoreboard.registerNewTeam("defense");
             defenseTeam.setAllowFriendlyFire(false);
             defenseTeam.setCanSeeFriendlyInvisibles(true);
             defenseTeam.setPrefix(chat("&2Defender "));
@@ -524,7 +586,7 @@ public class GameManager {
                     "&7치명타 확률이 &a+20%&7 증가하며 &7치명타 피해가 &a+4%&7 증가합니다.",
                     "",
                     "&c(주의) &4버서커&7가 발동되는 동안 &9회피&7가 불가능해집니다.",
-                    "&8Cooldown: &a"+Values.BERSERK.getCooltime()+"s",
+                    "&8Cooldown: &a" + Values.BERSERK.getCooltime() + "s",
                     "",
                     Values.BERSERK.toString(),
                     "",
@@ -534,7 +596,7 @@ public class GameManager {
                     "&6발광제 (Glower)",
                     "&a15초&7간 &6발광 &7합니다.",
                     "&6발광&7효과가 지속되는 동안 기지 안으로 들어갈 수 있습니다.",
-                    "&8Cooldown: &a"+Values.GLOWER.getCooltime()+"s",
+                    "&8Cooldown: &a" + Values.GLOWER.getCooltime() + "s",
                     "",
                     Values.GLOWER.toString(),
                     "",
@@ -546,7 +608,7 @@ public class GameManager {
             player.getInventory().setItem(14, createItem(Material.PISTON, 1,
                     "&d압축 펌프 충격기 (Piston Smash)",
                     "&a모든 &7적을 자신의 반대 방향으로 던집니다.",
-                    "&8Cooldown: &a"+Values.PISTON.getCooltime()+"s",
+                    "&8Cooldown: &a" + Values.PISTON.getCooltime() + "s",
                     "",
                     Values.PISTON.toString(),
                     "",
@@ -556,7 +618,7 @@ public class GameManager {
                     "&6발광제 (Glower)",
                     "&a30초&7간 &6발광 &7합니다.",
                     "&6발광&7효과가 지속되는 동안 기지 밖으로 나갈 수 있습니다.",
-                    "&8Cooldown: &a"+Values.GLOWER.getCooltime()+"s",
+                    "&8Cooldown: &a" + Values.GLOWER.getCooltime() + "s",
                     "",
                     Values.GLOWER.toString(),
                     "",
@@ -565,7 +627,7 @@ public class GameManager {
             player.getInventory().setItem(16, createItem(Material.BLAZE_ROD, 1,
                     "&c화염의 폭풍 (Fire Force)",
                     "&a모든 &7적에게 &a10초&7간 화염을 선사합니다!",
-                    "&8Cooldown: "+Values.FIRE_FORCE.getCooltime()+"s",
+                    "&8Cooldown: " + Values.FIRE_FORCE.getCooltime() + "s",
                     "",
                     Values.FIRE_FORCE.toString(),
                     "",
@@ -574,7 +636,7 @@ public class GameManager {
             player.getInventory().setItem(17, createItem(Material.WITHER_SKELETON_SKULL, 1,
                     "&8어둠의 폭발 (Darkness Blast)",
                     "&a모든 &7적에게 &8어둠&7, &8구속 II&7효과를 적용시킵니다.",
-                    "&8Cooldown: "+Values.DARKNESS_BLAST.getCooltime()+"s",
+                    "&8Cooldown: " + Values.DARKNESS_BLAST.getCooltime() + "s",
                     "",
                     Values.DARKNESS_BLAST.toString(),
                     "",
@@ -753,7 +815,7 @@ public class GameManager {
     }
 
     public boolean isAttackPlayer(Player player) {
-        if(defensePlayer == null) return false;
+        if (defensePlayer == null) return false;
         return !defensePlayer.equals(player.getUniqueId());
     }
 
@@ -762,55 +824,108 @@ public class GameManager {
     }
 
     public boolean hasMoney(Player player, int amount) {
-        return coin.getOrDefault(player.getUniqueId(), 0) >= amount;
+        return hasMoney(player.getUniqueId(), amount);
+    }
+
+    public boolean hasMoney(UUID uuid, int amount) {
+        return coin.getOrDefault(uuid, 0) >= amount;
+    }
+
+    public int forceRemoveMoney(Player player, int amount) {
+        return forceRemoveMoney(player.getUniqueId(), amount);
+    }
+
+    public int forceRemoveMoney(UUID uuid, int amount) {
+        if (hasMoney(uuid, amount)) {
+            removeMoney(uuid, amount);
+            return amount;
+        }
+        int money = getMoney(uuid);
+        removeMoney(uuid, amount);
+        return money;
     }
 
     public boolean removeMoney(Player player, int amount) {
-        int money = coin.getOrDefault(player.getUniqueId(), 0);
-        int cost = (int) (amount * (GameManager.getInstance().isAttackPlayer(player) ? 0.6 : 1));
-        if (money >= cost) {
-            coin.put(player.getUniqueId(), money - cost);
-            return true;
-        }
+        if (removeMoney(player.getUniqueId(), amount)) return true;
         player.sendMessage(chat("&c해당 아이템을 구매하기 위한 돈이 부족합니다."));
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 0.5f);
         return false;
     }
 
+    public boolean removeMoney(UUID uuid, int amount) {
+        int money = coin.getOrDefault(uuid, 0);
+        if (!isClassic() && getModifier(uuid).getPlayerClass() == PlayerClass.NIGGER && Math.random() < 0.2) {
+            return true;
+        }
+        int cost = (int) (amount * (isAttackPlayer(uuid) ? 0.6 : 1));
+        if (money >= cost) {
+            coin.put(uuid, money - cost);
+            return true;
+        }
+        return false;
+    }
+
     public void addMoney(Player player, int amount) {
-        if(!isAttackPlayer(player)) amount *= 1.1;
-        amount *= 1 + getModifier(player).getValue(PlayerAttribute.COIN_BOOST);
+//        if(!isAttackPlayer(player)) amount *= 1.1;
+        amount = (int) (amount * (1 + getModifier(player).getValue(PlayerAttribute.COIN_BOOST)));
         coin.merge(player.getUniqueId(), amount, Integer::sum);
+    }
+
+    public void addMoney(UUID uuid, int amount) {
+//        if(!isAttackPlayer(uuid)) amount *= 1.1;
+        amount = (int) (amount * (1 + getModifier(uuid).getValue(PlayerAttribute.COIN_BOOST)));
+        coin.merge(uuid, amount, Integer::sum);
     }
 
     public int getMoney(Player player) {
         return coin.getOrDefault(player.getUniqueId(), 0);
     }
 
+    public int getMoney(UUID uuid) {
+        return coin.getOrDefault(uuid, 0);
+    }
+
     public void addToken(Player player, int amount) {
-        tokenMap.merge(player.getUniqueId(), amount, Integer::sum);
+        addToken(player.getUniqueId(), amount);
+    }
+
+    public void addToken(UUID uuid, int amount) {
+        tokenMap.merge(uuid, amount, Integer::sum);
     }
 
     public boolean removeToken(Player player, int amount) {
-        int money = tokenMap.getOrDefault(player.getUniqueId(), 0);
-        if (money >= amount) {
-            tokenMap.put(player.getUniqueId(), money - amount);
-            return true;
-        }
+        if (removeToken(player.getUniqueId(), amount)) return true;
         player.sendMessage(chat("&c해당 능력을 강화하기 위한 토큰이 부족합니다."));
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 0.5f);
         return false;
     }
 
+    public boolean removeToken(UUID uuid, int amount) {
+        int money = tokenMap.getOrDefault(uuid, 0);
+        if (money >= amount) {
+            tokenMap.put(uuid, money - amount);
+            return true;
+        }
+        return false;
+    }
+
     public int getToken(Player player) {
-        return tokenMap.getOrDefault(player.getUniqueId(), 0);
+        return getToken(player.getUniqueId());
+    }
+
+    public int getToken(UUID uuid) {
+        return tokenMap.getOrDefault(uuid, 0);
     }
 
     public PlayerModifier getModifier(Player player) {
-        PlayerModifier modifier = modifierMap.get(player.getUniqueId());
+        return getModifier(player.getUniqueId());
+    }
+
+    public PlayerModifier getModifier(UUID uuid) {
+        PlayerModifier modifier = modifierMap.get(uuid);
         if (modifier != null) return modifier;
-        modifier = new PlayerModifier(player.getUniqueId());
-        modifierMap.put(player.getUniqueId(), modifier);
+        modifier = new PlayerModifier(uuid);
+        modifierMap.put(uuid, modifier);
         return modifier;
     }
 

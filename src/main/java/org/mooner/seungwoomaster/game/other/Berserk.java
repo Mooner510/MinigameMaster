@@ -19,12 +19,12 @@ public class Berserk {
         time = 10 * 10;
         p.playSound(p, Sound.ENTITY_ENDER_DRAGON_GROWL, 1, 2f);
         Bukkit.getScheduler().runTaskTimer(master, task -> {
-            if(preTime <= 0) {
+            if (preTime <= 0) {
                 enable(p);
                 task.cancel();
                 return;
             }
-            p.sendMessage(chat("&c" + preTime-- + "초 &e후 &c버서커&7가 해제됩니다."));
+            p.sendMessage(chat("&c" + preTime-- + "초 &e후 &c버서커&7가 활성화됩니다."));
             p.playSound(p, Sound.UI_BUTTON_CLICK, 1, 2f);
         }, 0, 20);
     }
@@ -40,7 +40,7 @@ public class Berserk {
         p.getInventory().setHelmet(new ItemStack(Material.DRAGON_HEAD));
         Bukkit.getScheduler().runTaskTimer(master, task -> {
             p.spawnParticle(Particle.CRIT_MAGIC, p.getLocation().clone().add(0, 1, 0), 20, 0.2, 0.2, 0.2);
-            if(time-- <= 1) {
+            if (time-- <= 1) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     player.playSound(p.getLocation(), Sound.ENTITY_WARDEN_DEATH, 1, 1);
                 }

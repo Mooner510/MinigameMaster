@@ -20,6 +20,7 @@ import java.util.Arrays;
 import static org.mooner.seungwoomaster.MoonerUtils.*;
 import static org.mooner.seungwoomaster.SeungWooMaster.master;
 import static org.mooner.seungwoomaster.game.gui.GUIUtils.createItem;
+import static org.mooner.seungwoomaster.game.gui.GUIUtils.ench;
 
 public class TokenGUI {
     private Inventory inventory;
@@ -48,6 +49,10 @@ public class TokenGUI {
                     "&c준비하려면 클릭하세요."
             ));
 
+            inventory.setItem(41, createItem(Material.CHEST, 1, "&c토큰 초기화",
+                    "&7강화한 토큰 레벨을 모두 초기화합니다."
+            ));
+
             for (int i = 9; i >= 1; i--) {
                 int finalI = i;
                 Bukkit.getScheduler().runTaskLater(master, () ->
@@ -71,46 +76,69 @@ public class TokenGUI {
     public void update(PlayerModifier modifier) {
         int token = GameManager.getInstance().getToken(player);
         if (token > 0) {
-            inventory.setItem(4, createItem(Material.DISC_FRAGMENT_5, token, "&5Ability Token"));
+            inventory.setItem(4, createItem(Material.DISC_FRAGMENT_5, token, "&5Ability Token: x" + token));
         } else {
-            inventory.setItem(4, createItem(Material.STRUCTURE_VOID, token, "&5Ability Token"));
+            inventory.setItem(4, createItem(Material.STRUCTURE_VOID, token, "&5Ability Token: x" + token));
         }
 
         inventory.setItem(11, createItem(Material.GOLDEN_APPLE, Math.max(modifier.getLevel(PlayerAttribute.HEALTH), 1),
                 "&cHealth Boost " + rome(modifier.getLevel(PlayerAttribute.HEALTH)),
                 "&7체력이 레벨당 &c" + parseString(PlayerAttribute.HEALTH.getValue()) + "&7 증가합니다.",
                 "",
+                "&7체력 증가: +&c" + parseString(modifier.getValue(PlayerAttribute.HEALTH) * 100, 1) + " {hp}",
+                "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.HEALTH)) + " Token"));
 
         inventory.setItem(12, createItem(Material.IRON_CHESTPLATE, Math.max(modifier.getLevel(PlayerAttribute.DEFENSE), 1),
                 "&aDefense Boost " + rome(modifier.getLevel(PlayerAttribute.DEFENSE)),
-                "&7플레이어로부터 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
-                "&7레벨당 &4Critical Master&7를 &a0.5&7레벨 억제합니다.",
+                "&7방어력이 레벨당 &a" + parseString(PlayerAttribute.DEFENSE.getValue() * 100, 1) + "%&7 증가합니다.",
+                "&7레벨당 &4Critical Master&7를 &a0.4&7레벨 억제합니다.",
+                "",
+                "&7방어력 증가: +&a" + parseString(modifier.getValue(PlayerAttribute.DEFENSE) * 100, 1) + "%",
+                "&4Critical Master&& 억제: &a" + parseString(modifier.getValue(PlayerAttribute.DEFENSE) * 0.4, 1) + " 레벨",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DEFENSE)) + " Token"));
 
         inventory.setItem(13, createItem(Material.SHIELD, Math.max(modifier.getLevel(PlayerAttribute.DODGE), 1),
                 "&9Dodge " + rome(modifier.getLevel(PlayerAttribute.DODGE)),
-                "&7레벨당 &a" + parseString(PlayerAttribute.DODGE.getValue() * 100,
-                        2) + "%&7 확률로 공격을 회피합니다.",
+                "&7레벨당 &a" + parseString(PlayerAttribute.DODGE.getValue() * 100, 2) + "%&7 확률로 공격을 회피합니다.",
+                "",
+                "&7현재 회피 확률: &9" + parseString(modifier.getValue(PlayerAttribute.DODGE) * 100, 1) + "%",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.DODGE)) + " Token"));
 
-        inventory.setItem(14, createItem(Material.OAK_SAPLING, Math.max(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE), 1),
-                "&2Natural Defense Boost " + rome(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)),
-                "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
-                "",
-                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE)) + " Token"));
+        int naturalDefense = modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE);
+        if (naturalDefense >= 8) {
+            inventory.setItem(14, ench(createItem(Material.OAK_SAPLING, naturalDefense,
+                    "&2Natural Defense Boost " + rome(naturalDefense),
+                    "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
+                    "",
+                    "&7자연적 피해 배율: &e" + parseString(100 - modifier.getValue(PlayerAttribute.NATURAL_DEFENSE) * 100, 1) + "%",
+                    "",
+                    "&c&lMAX LEVEL")));
+        } else {
+            inventory.setItem(14, createItem(Material.OAK_SAPLING, Math.max(naturalDefense, 1),
+                    "&2Natural Defense Boost " + rome(naturalDefense),
+                    "&7자연적으로 받는 피해가 레벨당 &a" + parseString(PlayerAttribute.NATURAL_DEFENSE.getValue() * 100, 1) + "%&7 감소합니다.",
+                    "",
+                    "&7피해 감소 배율: &a" + parseString(100 - modifier.getValue(PlayerAttribute.NATURAL_DEFENSE) * 100, 1) + "%",
+                    "",
+                    "&7Cost: &5" + getReq(naturalDefense) + " Token"));
+        }
 
         inventory.setItem(15, createItem(Material.EMERALD, Math.max(modifier.getLevel(PlayerAttribute.COIN_BOOST), 1),
                 "&6Coin Boost " + rome(modifier.getLevel(PlayerAttribute.COIN_BOOST)),
                 "&7코인 획득량이 레벨당 &a" + parseString(PlayerAttribute.COIN_BOOST.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
+                "&7코인 획득 배율: &c" + parseString(100 + modifier.getValue(PlayerAttribute.COIN_BOOST) * 100, 1) + "%",
+                "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.COIN_BOOST)) + " Token"));
 
         inventory.setItem(20, createItem(Material.IRON_SWORD, Math.max(modifier.getLevel(PlayerAttribute.MELEE_ATTACK), 1),
                 "&cMelee Attack Boost " + rome(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)),
-                "&7근접 공격력이 레벨당 &a" + parseString(PlayerAttribute.MELEE_ATTACK.getValue() * 100, 1) + "%&7 증가합니다.",
+                "&7가하는 근접 피해가 레벨당 &c" + parseString(PlayerAttribute.MELEE_ATTACK.getValue() * 100, 1) + "%&7 증가합니다.",
+                "",
+                "&7근접 피해 배율: &c" + parseString(100 + modifier.getValue(PlayerAttribute.MELEE_ATTACK) * 100, 1) + "%",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.MELEE_ATTACK)) + " Token"));
 
@@ -118,7 +146,18 @@ public class TokenGUI {
                 "&fSpeed Boost " + rome(modifier.getLevel(PlayerAttribute.SPEED)),
                 "&7이동속도가 레벨당 &a" + parseString(PlayerAttribute.SPEED.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
+                "&7이동 속도: &a" + parseString(100 + modifier.getValue(PlayerAttribute.SPEED) * 100, 1),
+                "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.SPEED)) + " Token"));
+
+        inventory.setItem(22, ench(createItem(Material.ENDER_EYE, Math.max(modifier.getLevel(PlayerAttribute.SWAP), 1),
+                "&9Swap " + rome(modifier.getLevel(PlayerAttribute.SWAP)),
+                "상대방의 공격으로 자신에게 &5크리티컬&7이 발동되었을 때,",
+                "레벨당 " + parseString(PlayerAttribute.SWAP.getValue() * 100, 1) + " 확률로 &9핫바 슬롯의 아이템을 무작위로 배치&7시킵니다.",
+                "",
+                "&7핫바 스왑 확률: &9" + parseString(modifier.getValue(PlayerAttribute.SWAP) * 100, 1) + "%",
+                "",
+                "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.SWAP)) * 2 + " Token")));
 
 //        inventory.setItem(21, createItem(Material.BOW, Math.max(modifier.getLevel(PlayerAttribute.RANGED_ATTACK), 1),
 //                "&cRanged Attack Boost " + rome(modifier.getLevel(PlayerAttribute.RANGED_ATTACK)),
@@ -130,11 +169,15 @@ public class TokenGUI {
                 "&5Critical Maker " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)),
                 "&7치명타를 발생할 확률이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_CHANCE.getValue() * 100, 1) + "%&7 증가합니다.",
                 "",
+                "&7치명타 확률: &c" + parseString(PlayerAttribute.CRITICAL_CHANCE.getValue() * 100 + 5, 1) + "%",
+                "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE)) + " Token"));
 
         inventory.setItem(24, createItem(Material.BLAZE_POWDER, Math.max(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE), 1),
                 "&4Critical Master " + rome(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)),
                 "&7치명타시 공격력이 레벨당 &a" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100, 1) + "%&7 증가합니다.",
+                "",
+                "&7치명타 피해: &c" + parseString(PlayerAttribute.CRITICAL_DAMAGE.getValue() * 100 + 10, 1) + "%",
                 "",
                 "&7Cost: &5" + getReq(modifier.getLevel(PlayerAttribute.CRITICAL_DAMAGE)) + " Token"));
     }
@@ -147,7 +190,7 @@ public class TokenGUI {
                 if (item == null || e.getClickedInventory() == null || item.getType().equals(Material.AIR)) return;
                 if (e.getInventory().equals(inventory)) {
                     e.setCancelled(true);
-                    if(item.getType() == Material.LIME_DYE) {
+                    if (item.getType() == Material.LIME_DYE) {
                         player.closeInventory();
                         return;
                     }
@@ -176,6 +219,7 @@ public class TokenGUI {
                         }
                         case 14 -> {
                             level = modifier.getLevel(PlayerAttribute.NATURAL_DEFENSE);
+                            if (level >= 8) return;
                             if (gameManager.removeToken(player, getReq(level))) {
                                 modifier.addLevel(PlayerAttribute.NATURAL_DEFENSE);
                             } else return;
@@ -204,6 +248,12 @@ public class TokenGUI {
                                 modifier.addLevel(PlayerAttribute.SPEED);
                             } else return;
                         }
+                        case 22 -> {
+                            level = modifier.getLevel(PlayerAttribute.SWAP);
+                            if (gameManager.removeToken(player, getReq(level) * 2)) {
+                                modifier.addLevel(PlayerAttribute.SWAP);
+                            } else return;
+                        }
                         case 23 -> {
                             level = modifier.getLevel(PlayerAttribute.CRITICAL_CHANCE);
                             if (gameManager.removeToken(player, getReq(level))) {
@@ -216,12 +266,23 @@ public class TokenGUI {
                                 modifier.addLevel(PlayerAttribute.CRITICAL_DAMAGE);
                             } else return;
                         }
+                        case 41 -> {
+                            int token = 0;
+                            for (PlayerAttribute attribute : PlayerAttribute.values()) {
+                                int levels = modifier.resetLevel(attribute);
+                                token += (levels * (levels + 1)) / (attribute == PlayerAttribute.SWAP ? 1 : 2);
+                            }
+                            gameManager.addToken(player, token);
+                            player.playSound(player, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 1.5f);
+                            update(modifier);
+                            return;
+                        }
                         default -> {
                             return;
                         }
                     }
                     String displayName = item.getItemMeta().getDisplayName();
-                    if(level > 0) {
+                    if (level > 0) {
                         String[] s = displayName.split(" ");
                         displayName = String.join(" ", Arrays.copyOf(s, s.length - 1));
                     }
@@ -239,7 +300,9 @@ public class TokenGUI {
                     Bukkit.getScheduler().runTaskLater(master, () -> e.getPlayer().openInventory(inventory), 1);
                     return;
                 }
-                GameManager.getInstance().setReady(player);
+                GameManager gameManager = GameManager.getInstance();
+                gameManager.setReady(player);
+                gameManager.getModifier(player).refresh();
                 HandlerList.unregisterAll(this);
                 player = null;
                 inventory = null;
