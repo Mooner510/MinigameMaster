@@ -1,6 +1,6 @@
-name: SeungWooMaster
+name: The-Cage
 version: '1.0'
-main: org.mooner.seungwoomaster.SeungWooMaster
+main: org.mooner.seungwoomaster.TheCage
 api-version: 1.19
 
 commands:
